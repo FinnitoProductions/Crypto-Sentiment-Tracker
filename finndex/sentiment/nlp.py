@@ -8,7 +8,7 @@ from finndex.graphing import gauge
 STANFORD_NLP_LOCATION = '~/stanford-corenlp-full-2018-10-05/' # the location of the Stanford NLP library on my computer 
                                                             #(download at https://stanfordnlp.github.io/CoreNLP)
 STANFORD_NLP_TIMEOUT = 100000 # the time after which a given NLP request will be killed if not yet complete
-STANFORD_NLP_PORT = 9009
+STANFORD_NLP_PORT = 9000
 
 MIN_SENTIMENT = 0
 MAX_SENTIMENT = 4
