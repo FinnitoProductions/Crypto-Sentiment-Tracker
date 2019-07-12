@@ -6,7 +6,7 @@ Once you have cloned the repository, create a virtual environment from which all
 Within the cloned repository's directory, execute the following commands in your command line.
 ```shell
 python3 -m venv cryptickoenv
-source projectname/bin/activate # activates the Python virtual environment
+source cryptickoenv/bin/activate # activates the Python virtual environment
 pip install ipykernel
 ipython kernel install --user --name=cryptickoenv
 ```
