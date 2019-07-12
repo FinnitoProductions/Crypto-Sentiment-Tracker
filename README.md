@@ -6,7 +6,7 @@ Once you have cloned the repository, create a virtual environment from which all
 Within the cloned repository's directory, execute the following commands in your command line.
 ```shell
 python3 -m venv cryptickoenv
-source projectname/bin/activate # activates the Python virtual environment
+source cryptickoenv/bin/activate # activates the Python virtual environment
 pip install ipykernel
 ipython kernel install --user --name=cryptickoenv
 ```
@@ -15,6 +15,8 @@ Install all necessary libraries (as dictated in `requirements.txt`) by executing
 ```shell
 pip install -r requirements.txt
 ```
+### Stanford NLP
+Stanford's Natural Language Processing library (used in this project for Sentiment analysis) requires a large download. Download the `.zip` archive at [https://stanfordnlp.github.io/CoreNLP](https://stanfordnlp.github.io/CoreNLP) and place the extracted folder in your home directory.
 ### Running the Notebook
 To activate the Jupyter notebook, execute the following command &mdash; Anaconda and Jupyter must be installed.
 ```shell
