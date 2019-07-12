@@ -15,6 +15,8 @@ Install all necessary libraries (as dictated in `requirements.txt`) by executing
 ```shell
 pip install -r requirements.txt
 ```
+### Stanford NLP
+Stanford's Natural Language Processing library (used in this project for Sentiment analysis) requires a large download. Download the `.zip` archive at [https://stanfordnlp.github.io/CoreNLP](https://stanfordnlp.github.io/CoreNLP) and place the extracted folder in your home directory.
 ### Running the Notebook
 To activate the Jupyter notebook, execute the following command &mdash; Anaconda and Jupyter must be installed.
 ```shell
