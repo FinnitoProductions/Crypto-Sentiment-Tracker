@@ -12,7 +12,8 @@ from finndex.util import dateutil
 Represents an easily modifiable time series. 
 
 The data is provided in 'data', where each key (string) represents the type of value stored (like 'price' or 'sentiment')
-and the corresponding value is a dictionary where the key is date and the value is the corresponding value on that day.
+and the corresponding value is an list of dictionaries where the key is date and the value is the corresponding value on that day.
+Each list represents a single axis, thus all the data in a list will be plotted on the same axis. Up to 2 axes are supported.
 
 dateFormat (string) represents the format of all the incoming x-values. graphDateFormat (string) represents the format in which the given
 dates will be displayed on the x-axis. 
@@ -38,24 +39,11 @@ class TimeSeries:
         if self.fig == None: # generating the graph for the first time
             self.fig, baseAxis = plt.subplots()
             firstExecution = True
-            print('hello')
         else:
             baseAxis = self.axes[0]
             firstExecution = False
         
-        for idx, (valueType, valDict) in enumerate(self.data.items()):
-            dates = [date for date in valDict]
-            values = [val for val in valDict.values()]
-
-            formattedDates = []
-            for date in dates:
-                if not isinstance(date, datetime.datetime):
-                    formattedDates += [datetime.datetime.strptime(date, self.dataDateFormat)]
-                else:
-                    formattedDates += [date]
-                
-            dates = matplotlib.dates.date2num(formattedDates)
-
+        for idx, (valueType, valDictList) in enumerate(self.data.items()):
             if not firstExecution:
                 desiredAxes = self.axes[idx]
             else:
@@ -65,9 +53,22 @@ class TimeSeries:
                     desiredAxes = baseAxis.twinx()
                 self.axes += [desiredAxes]
                 
-                
+            
             desiredAxes.set_ylabel(valueType, color=self.colors[idx])
-            desiredAxes.plot(formattedDates, values, color = self.colors[idx])
+
+            for valDict in valDictList:
+                dates = [date for date in valDict]
+                values = [val for val in valDict.values()]
+
+                formattedDates = []
+                for date in dates:
+                    if not isinstance(date, datetime.datetime):
+                        formattedDates += [datetime.datetime.strptime(date, self.dataDateFormat)]
+                    else:
+                        formattedDates += [date]
+                    
+                dates = matplotlib.dates.date2num(formattedDates)
+                desiredAxes.plot(formattedDates, values, color = self.colors[idx])
             desiredAxes.set_title(self.title)
             desiredAxes.xaxis.set_major_formatter(matplotlib.dates.DateFormatter(self.graphedDateFormat))
             
