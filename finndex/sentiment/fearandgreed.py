@@ -31,11 +31,11 @@ def getAllFearAndGreed():
     return dataDict
 
 # Displays a given Fear and Greed value (0-100) in a convenient gauge format.
-def displayFearAndGreedNum(val):
+def displayFearAndGreedNum(val, display=True):
     return gauge.Gauge(labels=['Extreme Fear','Fear','Greed','Extreme Greed'], 
       colors=['#c80000','#c84b00','#64a000', '#00c800'], currentVal=val, minVal = MIN_FEAR_AND_GREED,
-                 maxVal = MAX_FEAR_AND_GREED, title='Fear and Greed')
+                 maxVal = MAX_FEAR_AND_GREED, title='Fear and Greed', displayGauge=display)
 
 # Displays the Fear and Greed value from a given date in a convenient gauge format.
-def displayFearAndGreedDate(date=datetime.datetime.now()):
-    return displayFearAndGreedNum(getFearAndGreed(date))
+def displayFearAndGreedDate(date=datetime.datetime.now(), display=True):
+    return displayFearAndGreedNum(getFearAndGreed(date), display)

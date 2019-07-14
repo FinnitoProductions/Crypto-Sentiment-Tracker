@@ -34,7 +34,7 @@ per day.
 
 Returns a dictionary with key as date and value the trends data on that date.
 '''
-def getTrendsDataByDay(keyword, startDate, endDate):
+def getTrendsDateRange(startDate, endDate, keyword="Bitcoin"):
     trendsData = getTrendsData(keyword, startDate, endDate)
  
     dateDict = {}
@@ -48,11 +48,11 @@ def getTrendsDataByDay(keyword, startDate, endDate):
     return {date:numpy.average(vals) for date, vals in dateDict.items()}
 
 # Determines the Google trends data on a given date.
-def getTrendsDataDate(keyword="Bitcoin", date=datetime.datetime.now()):
+def getTrendsDate(date=datetime.datetime.now(), keyword="Bitcoin"):
     startDate = datetime.datetime(year=date.year, month=date.month, day=date.day)
     trendsData = getTrendsData(keyword, startDate, startDate + datetime.timedelta(days=1))
     
     return numpy.average(trendsData)
 
-def displayTrendsDataDate(keyword="Bitcoin", date=datetime.datetime.now()):
-    return gauge.displayNeutralGauge(getTrendsDataDate(keyword, date), MIN_TRENDS_VAL, MAX_TRENDS_VAL, "Google Trends")
+def displayTrendsDate(date=datetime.datetime.now(), display=True, keyword="Bitcoin"):
+    return gauge.displayNeutralGauge(getTrendsDate(date=date, keyword=keyword), MIN_TRENDS_VAL, MAX_TRENDS_VAL, "Google Trends", display=display)

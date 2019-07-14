@@ -20,22 +20,20 @@ class DataReading:
 
 class StaticMetricType(Enum):
    FEAR_AND_GREED = fearandgreed.displayFearAndGreedDate
-   TRENDS = trends.displayTrendsDataDate
+   TRENDS = trends.displayTrendsDate
 
 class InstantaneousSentimentManager:
-   def __init__(self, keywordsList, date=datetime.datetime.now(), weights=None):
+   def __init__(self, keywordsList, date=datetime.datetime.now(), weights=None, displayIntermediates=False):
       self.dataVals = []
       slidersList = []
-      
-      keywordIndex = 0
-      for keyword in keywordsList:
-         dataReading = DataReading(name=str(keyword), gauge=keyword(date=date), 
+
+      for idx, keyword in enumerate(keywordsList):
+         dataReading = DataReading(name=str(keyword), gauge=keyword(date=date, display=displayIntermediates), 
                                    slider=sliders.Slider(str(keyword), widgets.FloatSlider(min=0.0, max=sliders.MAX_VAL, 
                                                                                            step=sliders.STEP, 
-                                                                                           value=weights[keywordIndex] if weights != None else 0.0)))
+                                                                                           value=weights[idx] if weights != None else 0.0)))
          self.dataVals += [dataReading]
          slidersList += [dataReading.slider]
-         keywordIndex += 1
 
 
 
@@ -44,10 +42,8 @@ class InstantaneousSentimentManager:
 
       if weights == None:
          self.sliderManager = sliders.SliderManager(self.updateGauge, slidersList)
-         self.displayAggregateSentimentMeter()
-         display(self.sliderManager.generateDisplayBox())
       else:
-         self.displayAggregateSentimentMeter()
+         self.sliderManager = None
 
    def getDataReading(self, name):
       return [reading for reading in self.dataVals if reading.name == name][0]
@@ -76,7 +72,7 @@ class InstantaneousSentimentManager:
    Displays the aggregate sentiment meter based on a dictionary of values. See computeAggregateSentiment for a complete
    description of this parameter.
    '''
-   def displayAggregateSentimentMeter(self):
+   def displayGauge(self):
       aggregateVal, minVal, maxVal = self.computeAggregateSentiment()
       
       self.gauge = gauge.Gauge(labels=['—','0','+'], 
@@ -84,9 +80,16 @@ class InstantaneousSentimentManager:
                   minVal = minVal,
                   maxVal = maxVal, title='Aggregate Sentiment')
 
+      if self.sliderManager != None:
+         display(self.sliderManager.generateDisplayBox())
+
       return self.gauge
 
    # Updates the corresponding gauge given a new set of values and the existing gauge.
    def updateGauge(self):
       self.gauge.currentVal, self.gauge.minVal, self.gauge.maxVal = self.computeAggregateSentiment()
       self.gauge.generateGauge()
+
+   # Retrieves the aggregate sentiment value as a float.
+   def getReading(self):
+      return self.computeAggregateSentiment()

@@ -33,8 +33,12 @@ class Gauge:
         self.title = title
         
         self.gaugeGenerated = False
+
+        self.fig = None
+        self.ax = None
+        
         if displayGauge:
-            self.fig, self.ax, self.arrow = self.generateGauge()
+            self.generateGauge()
         
         
     '''
@@ -52,7 +56,7 @@ class Gauge:
             begins the plotting
             """
 
-            fig, ax = plt.subplots()
+            self.fig, self.ax = plt.subplots()
 
             ang_range, mid_points = degreeRange(N)
 
@@ -68,7 +72,7 @@ class Gauge:
                 # arcs
                 patches.append(Wedge((0.,0.), .4, *ang, width=0.10, facecolor=c, lw=2, alpha=0.5))
 
-            [ax.add_patch(p) for p in patches]
+            [self.ax.add_patch(p) for p in patches]
 
 
             """
@@ -81,7 +85,7 @@ class Gauge:
                 MAX_FONT_SIZE = 30
 
                 fontSize = min(AVG_STR_LENGTH / len(lab) * AVG_FONT_SIZE, MAX_FONT_SIZE) # create dynamic font size based on string length
-                ax.text(0.35 * np.cos(np.radians(mid)), 0.35 * np.sin(np.radians(mid)), lab,
+                self.ax.text(0.35 * np.cos(np.radians(mid)), 0.35 * np.sin(np.radians(mid)), lab,
                     horizontalalignment='center', verticalalignment='center', fontsize=fontSize,
                     fontweight='bold', rotation = rot_text(mid))
 
@@ -89,9 +93,9 @@ class Gauge:
             set the bottom banner and the title
             """
             r = Rectangle((-0.4,-0.1),0.8,0.1, facecolor='w', lw=2)
-            ax.add_patch(r)
+            self.ax.add_patch(r)
 
-            ax.text(0, -0.05, self.title, horizontalalignment='center',
+            self.ax.text(0, -0.05, self.title, horizontalalignment='center',
                 verticalalignment='center', fontsize=22, fontweight='bold')
 
             #Plot the arrow based on given sentiment value.
@@ -100,25 +104,22 @@ class Gauge:
 
             pos = mathutil.map(self.currentVal, self.minVal, self.maxVal, highestAngle, lowestAngle)
 
-            arrow = ax.arrow(0, 0, 0.225 * np.cos(np.radians(pos)), 0.225 * np.sin(np.radians(pos)),
+            self.arrow = self.ax.arrow(0, 0, 0.225 * np.cos(np.radians(pos)), 0.225 * np.sin(np.radians(pos)),
                         width=0.03, head_width=0.09, head_length=0.1, fc='k', ec='k')
-            #arrow.remove()
 
-            ax.add_patch(Circle((0, 0), radius=ARROW_TAIL_RADIUS, facecolor='k')) # make the arrow rounded at the tail
+            self.ax.add_patch(Circle((0, 0), radius=ARROW_TAIL_RADIUS, facecolor='k')) # make the arrow rounded at the tail
 
             """
             removes frame and ticks, and makes axis equal and tight
             """
 
-            ax.set_frame_on(False)
-            ax.axes.set_xticks([])
-            ax.axes.set_yticks([])
-            ax.axis('equal')
+            self.ax.set_frame_on(False)
+            self.ax.axes.set_xticks([])
+            self.ax.axes.set_yticks([])
+            self.ax.axis('equal')
 
             plt.tight_layout()
             plt.show()
-            
-            returnVal = (fig, ax, arrow)
         else:
             self.arrow.remove()
             highestAngle = 180
@@ -128,17 +129,12 @@ class Gauge:
                                                            width=0.03, head_width=0.09, head_length=0.1, fc='k', ec='k')
       
             self.fig.canvas.draw_idle()
-
-            returnVal = (self.fig, self.ax, self.arrow)
         
         self.gaugeGenerated = True
 
-        return returnVal
+        return (self.fig, self.ax, self.arrow)
 
 # Generates a gauge with options "Low", "Medium", and "High".
-def displayNeutralGauge(currentVal, minVal, maxVal, title):
+def displayNeutralGauge(currentVal, minVal, maxVal, title, display=True):
     return Gauge(labels=["Low", "Medium", "High"], colors=['#c80000','#646400','#00c800'], currentVal=currentVal,
-                 minVal=minVal, maxVal=maxVal, title=title)
-
-def printStuff():
-   print('testPrint')
+                 minVal=minVal, maxVal=maxVal, title=title, displayGauge=display)
