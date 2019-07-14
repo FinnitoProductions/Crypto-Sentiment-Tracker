@@ -5,61 +5,76 @@ import numpy as np
 from matplotlib import cm
 from matplotlib import pyplot as plt
 
+from finndex.util import dateutil
 
-class TimeSeries:
-    def __init__(self, fig=None, ax=None):
-        self.fig = fig
-        self.ax = ax
 
 '''
-Plots an easily modifiable time series. 
+Represents an easily modifiable time series. 
 
-The data is provided in xyDict, where each key (string) represents the type of value stored (like 'price' or 'sentiment')
-and the corresponding value is a dictionary containing two keys: 'x' and 'y'. 'x' points to a list of the x-values of all
-the desired points (must be in a date format) and 'y' points to a list of the y-values of the desired points. The first key in the dictionary is
-the only data that can be modified.
+The data is provided in 'data', where each key (string) represents the type of value stored (like 'price' or 'sentiment')
+and the corresponding value is a dictionary where the key is date and the value is the corresponding value on that day.
 
 dateFormat (string) represents the format of all the incoming x-values. graphDateFormat (string) represents the format in which the given
 dates will be displayed on the x-axis. 
 
 If seeking to modify an existing graph, existingGraph represents the TimeSeries which was already produced by this function.
 '''
-def plotTimeSeries(xyDict, title="",dateFormat="%Y-%m-%dT%H:%M:%S.%fZ", graphDateFormat="%Y", existingGraph=None, 
-                   yMin=None, yMax=None):
-    if existingGraph == None:
-        fig, ax = plt.subplots()
-    else:
-        fig, ax = existingGraph.fig, existingGraph.ax
-    
-    colors = ['tab:red', 'tab:blue', 'tab:green']
-    i = 0
-    for valueType, xyVals in xyDict.items():
-        formattedDates = []
-        for date in xyVals['x']:
-            if not isinstance(date, datetime.datetime):
-                formattedDates += [datetime.datetime.strptime(date, dateFormat)]
-            else:
-                formattedDates += [date]
-            
-        dates = matplotlib.dates.date2num(formattedDates)
+class TimeSeries:
+    def __init__(self, title, data, colors=['tab:red', 'tab:blue', 'tab:green'], dataDateFormat=dateutil.DESIRED_DATE_FORMAT, graphedDateFormat = "%Y", yMin=None, yMax=None):
+        self.title = title
+        self.data = data
+        self.dataDateFormat = dataDateFormat
+        self.graphedDateFormat = graphedDateFormat
+        self.yMin = yMin
+        self.yMax = yMax
+        self.colors=colors
 
-        if i == 0:
-            desiredAxes = ax
-        else:
-            desiredAxes = ax.twinx()
-            
-        desiredAxes.set_ylabel(valueType, color=colors[i])
-        desiredAxes.plot(formattedDates, xyVals['y'], color = colors[i])
-        desiredAxes.set_title(title)
-        desiredAxes.xaxis.set_major_formatter(matplotlib.dates.DateFormatter(graphDateFormat))
+        self.fig = None
+        self.axes = []
         
-        if yMin != None:
-            ax.set_ylim(ymin=yMin)
-        if yMax != None:
-            ax.set_ylim(ymax=yMax)
-            
-        i += 1
-    fig.tight_layout()
-    plt.show()
+        self.plotTimeSeries()
     
-    return TimeSeries(fig, ax)
+    def plotTimeSeries(self):
+        if self.fig == None: # generating the graph for the first time
+            self.fig, baseAxis = plt.subplots()
+            firstExecution = True
+            print('hello')
+        else:
+            baseAxis = self.axes[0]
+            firstExecution = False
+        
+        for idx, (valueType, valDict) in enumerate(self.data.items()):
+            dates = [date for date in valDict]
+            values = [val for val in valDict.values()]
+
+            formattedDates = []
+            for date in dates:
+                if not isinstance(date, datetime.datetime):
+                    formattedDates += [datetime.datetime.strptime(date, self.dataDateFormat)]
+                else:
+                    formattedDates += [date]
+                
+            dates = matplotlib.dates.date2num(formattedDates)
+
+            if not firstExecution:
+                desiredAxes = self.axes[idx]
+            else:
+                if idx == 0:
+                    desiredAxes = baseAxis
+                else:
+                    desiredAxes = baseAxis.twinx()
+                self.axes += [desiredAxes]
+                
+                
+            desiredAxes.set_ylabel(valueType, color=self.colors[idx])
+            desiredAxes.plot(formattedDates, values, color = self.colors[idx])
+            desiredAxes.set_title(self.title)
+            desiredAxes.xaxis.set_major_formatter(matplotlib.dates.DateFormatter(self.graphedDateFormat))
+            
+            if self.yMin != None:
+                desiredAxes.set_ylim(ymin=self.yMin)
+            if self.yMax != None:
+                desiredAxes.set_ylim(ymax=self.yMax)
+            
+        self.fig.tight_layout()
+        plt.show()
