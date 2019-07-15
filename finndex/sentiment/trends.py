@@ -28,7 +28,6 @@ def getTrendsData(keyword, startDate, endDate):
 
    newDict = {}
    for date, val in trend.items():
-      print(val, mathutil.map(val, MIN_TRENDS_VAL, MAX_TRENDS_VAL, 0, 1))
       newDict[date] = mathutil.map(val, MIN_TRENDS_VAL, MAX_TRENDS_VAL, 0, 1)
 
    return newDict
@@ -51,7 +50,6 @@ def getTrendsDateRange(startDate, endDate, keyword="Bitcoin"):
       else:
          dateDict[dateString] += [value]
          
-   print({date:numpy.average(vals) for date, vals in dateDict.items()})
    return {date:numpy.average(vals) for date, vals in dateDict.items()}
 
 # Determines the Google trends data on a given date.

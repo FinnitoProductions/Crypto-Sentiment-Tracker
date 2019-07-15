@@ -1,4 +1,5 @@
 import datetime
+import functools
 from enum import Enum
 
 import ipywidgets as widgets
@@ -6,6 +7,7 @@ import numpy as np
 from IPython.display import display
 
 from finndex.aggregate import sliders
+from finndex.fundamental import coinmetrics
 from finndex.graphing import timeseries
 from finndex.sentiment import fearandgreed, trends
 from finndex.util import dateutil, mathutil
@@ -17,12 +19,14 @@ and the corresponding value on that date as the value. 'slider' is the slider mo
 '''
 class HistoricalDataReading:
     def __init__(self, name, values, slider):
+        self.name = name
         self.values = values
         self.slider = slider
 
 class HistoricalMetricType(Enum):
-   FEAR_AND_GREED = fearandgreed.getFearAndGreedDateRange
-   TRENDS = trends.getTrendsDateRange
+   FEAR_AND_GREED = functools.partial(fearandgreed.getFearAndGreedDateRange)
+   TRENDS = functools.partial(trends.getTrendsDateRange)
+   BLOCK_COUNT = functools.partial(coinmetrics.getCoinMetricsDateRange, coinmetrics.CoinMetricsData.BLOCK_COUNT)
 
 class HistoricalSentimentManager:
    def __init__(self, weightedKeywordsList, startDate = datetime.datetime.now() - datetime.timedelta(weeks=4), endDate = datetime.datetime.now(), weights = None, 
@@ -31,7 +35,7 @@ class HistoricalSentimentManager:
       slidersList = []
 
       for idx, keyword in enumerate(weightedKeywordsList):
-         dataReading = HistoricalDataReading(name=str(keyword), values=keyword(startDate=startDate, endDate=endDate), 
+         dataReading = HistoricalDataReading(name=str(keyword), values=keyword.value(startDate=startDate, endDate=endDate), 
                                    slider=sliders.Slider(str(keyword), widgets.FloatSlider(min=0.0, max=sliders.MAX_VAL, 
                                                                                            step=sliders.STEP, 
                                                                                            value=weights[idx] if weights != None else 0.0)))
@@ -64,7 +68,6 @@ class HistoricalSentimentManager:
                                        if convertedDate in historicalReading.values
                                       else -float('inf'), historicalReading.slider.getReading())] # add tuple with value (-infinity if nothing provided) and weight
 
-
          values = sentimentByDate[date]
          values.sort() # place all values with -infinity first so they can be dealt with
 
@@ -83,6 +86,8 @@ class HistoricalSentimentManager:
          for value, weight in values:
             sentimentByDate[date] += value * weight
 
+      
+
       return sentimentByDate
 
    '''
@@ -97,7 +102,7 @@ class HistoricalSentimentManager:
       data = {'aggregateSentiment': self.getHistoricalSentiment()}
 
       if self.graph == None:
-         self.graph = timeseries.TimeSeries(title = "Aggregate Sentiment", data=data, yMin=0, yMax=1)
+         self.graph = timeseries.TimeSeries(title = "Aggregate Sentiment", data=data, graphedDateFormat="%Y", yMin=0, yMax=1)
 
          if self.sliderManager != None:
             display(self.sliderManager.generateDisplayBox())

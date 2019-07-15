@@ -3,7 +3,7 @@ import json
 from enum import Enum
 
 from finndex.graphing import timeseries
-from finndex.util import dateutil, webutil
+from finndex.util import dateutil, mathutil, webutil
 
 COIN_METRICS_API_PREFIX = "https://community-api.coinmetrics.io/v2/"
 NETWORK_METRIC_SUFFIX = "assets/%s/metricdata?metrics="
@@ -47,6 +47,22 @@ def getCoinMetricsData(desiredData, date):
 
     return [singleDay['values'][0] for singleDay in dataDict['series'] 
             if timestampFormatted in singleDay['time']][0]
+
+# Retrieves from CoinMetrics a metric (from [0, 1]) of a given keyword 'desiredData' (type CoinMetricsData) from a given date range.
+def getCoinMetricsDateRange(desiredData, startDate, endDate):
+    dataDict = getCoinMetricsDict(desiredData)
+
+    minVal = min(float(singleDay['values'][0]) for singleDay in dataDict['series'])
+    maxVal = max(float(singleDay['values'][0]) for singleDay in dataDict['series'])
+
+    valueDict = {}
+    for singleDay in dataDict['series']:
+        timestampDate = datetime.datetime.strptime(singleDay['time'], "%Y-%m-%dT%H:%M:%S.%fZ")
+
+        if timestampDate.date() >= startDate.date() and timestampDate.date() <= endDate.date():
+            valueDict[timestampDate.strftime(dateutil.DESIRED_DATE_FORMAT)] = mathutil.map(float(singleDay['values'][0]), minVal, maxVal, 0, 1)
+
+    return valueDict
     
 
 # Retrieves from CoinMetrics a metric of a given keyword 'desiredData' (type CoinMetricsData) across all time.
