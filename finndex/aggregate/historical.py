@@ -75,17 +75,15 @@ class HistoricalSentimentManager:
             if value == -float('inf'): # no value provided
                if i != len(values) - 1:
                   weightPerElement = weight / (len(values) - i - 1)
-               else:
-                  values[i] = (0.0, 1.0)
+               values[i] = (0.0, 1.0)
 
                for j, val in enumerate(values[i+1:], start = i+1):
-                  values[j] = (values[j][0], values[j][0] + weightPerElement)
+                  values[j] = (values[j][0], values[j][1] + weightPerElement)
 
          
          sentimentByDate[date] = 0
          for value, weight in values:
             sentimentByDate[date] += value * weight
-
       
 
       return sentimentByDate
