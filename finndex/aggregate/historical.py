@@ -29,6 +29,8 @@ class HistoricalMetricType(Enum):
    BLOCK_COUNT = functools.partial(coinmetrics.getCoinMetricsDateRange, coinmetrics.CoinMetricsData.BLOCK_COUNT)
    TRANSACTION_CNT = functools.partial(coinmetrics.getCoinMetricsDateRange, coinmetrics.CoinMetricsData.TRANSACTION_CNT)
    DAILY_ADDRESSES = functools.partial(coinmetrics.getCoinMetricsDateRange, coinmetrics.CoinMetricsData.DAILY_ADDRESSES)
+   MARKET_CAP = functools.partial(coinmetrics.getCoinMetricsDateRange, coinmetrics.CoinMetricsData.MARKET_CAP)
+   PRICE_USD = functools.partial(coinmetrics.getCoinMetricsDateRange, coinmetrics.CoinMetricsData.PRICE_USD)
 
 class HistoricalSentimentManager:
    def __init__(self, weightedKeywordsList, startDate = datetime.datetime.now() - datetime.timedelta(weeks=4), endDate = datetime.datetime.now(), weights = None, 
@@ -53,6 +55,8 @@ class HistoricalSentimentManager:
       self.endDate = endDate
 
       self.graph = None
+
+      self.unweightedKeywordsList = unweightedKeywordsList
 
 
    '''
@@ -100,9 +104,20 @@ class HistoricalSentimentManager:
    '''
    def displayGraph(self):
       data = {'aggregateSentiment': self.getHistoricalSentiment()}
+      for additionalKeyword in self.unweightedKeywordsList:
+         value = additionalKeyword.value(startDate = self.startDate, endDate = self.endDate)
+         if len(self.unweightedKeywordsList) == 1:
+            data[additionalKeyword] = value
+         else:
+            ADDITIONAL_DATA_KEY = 'Additional Data'
+            if not ADDITIONAL_DATA_KEY in data:
+               data[ADDITIONAL_DATA_KEY] = [value]
+            else:
+               data[ADDITIONAL_DATA_KEY] += [value]
+      
 
       if self.graph == None:
-         self.graph = timeseries.TimeSeries(title = "Aggregate Sentiment", data=data, graphedDateFormat="%Y", yMin=0, yMax=1)
+         self.graph = timeseries.TimeSeries(title = "Aggregate Sentiment", data=data, yMin=0, yMax=1)
 
          if self.sliderManager != None:
             display(self.sliderManager.generateDisplayBox())

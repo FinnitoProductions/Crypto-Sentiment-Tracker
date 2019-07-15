@@ -21,10 +21,22 @@ dates will be displayed on the x-axis.
 If seeking to modify an existing graph, existingGraph represents the TimeSeries which was already produced by this function.
 '''
 class TimeSeries:
-    def __init__(self, title, data, colors=['tab:red', 'tab:blue', 'tab:green'], dataDateFormat=dateutil.DESIRED_DATE_FORMAT, graphedDateFormat = "%Y", yMin=None, yMax=None):
+    def __init__(self, title, data, colors=['tab:red', 'tab:blue', 'tab:green'], dataDateFormat=dateutil.DESIRED_DATE_FORMAT, graphedDateFormat = None, yMin=None, yMax=None):
         self.title = title
         self.data = data
         self.dataDateFormat = dataDateFormat
+
+        if graphedDateFormat == None:
+            timeDifference = max(data[list(data.keys())[0]]) - min(data[list(data.keys())[0]])
+
+            if timeDifference <= datetime.timedelta(days=30*6):
+                graphedDateFormat = "%m-%d"
+            elif timeDifference <= datetime.timedelta(days=30*12):
+                graphedDateFormat = "%Y-%m"
+            else:
+                print('here')
+                graphedDateFormat = "%Y"
+
         self.graphedDateFormat = graphedDateFormat
         self.yMin = yMin
         self.yMax = yMax
@@ -58,7 +70,7 @@ class TimeSeries:
                 
             
             desiredAxes.clear()
-            
+
             desiredAxes.set_ylabel(valueType, color=self.colors[idx])
 
             for valDict in valDictList:
