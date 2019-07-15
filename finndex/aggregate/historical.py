@@ -27,6 +27,8 @@ class HistoricalMetricType(Enum):
    FEAR_AND_GREED = functools.partial(fearandgreed.getFearAndGreedDateRange)
    TRENDS = functools.partial(trends.getTrendsDateRange)
    BLOCK_COUNT = functools.partial(coinmetrics.getCoinMetricsDateRange, coinmetrics.CoinMetricsData.BLOCK_COUNT)
+   TRANSACTION_CNT = functools.partial(coinmetrics.getCoinMetricsDateRange, coinmetrics.CoinMetricsData.TRANSACTION_CNT)
+   DAILY_ADDRESSES = functools.partial(coinmetrics.getCoinMetricsDateRange, coinmetrics.CoinMetricsData.DAILY_ADDRESSES)
 
 class HistoricalSentimentManager:
    def __init__(self, weightedKeywordsList, startDate = datetime.datetime.now() - datetime.timedelta(weeks=4), endDate = datetime.datetime.now(), weights = None, 
