@@ -2,7 +2,7 @@ import datetime
 import json
 
 from finndex.graphing import gauge
-from finndex.util import dateutil, webutil
+from finndex.util import dateutil, mathutil, webutil
 
 FEAR_AND_GREED_ADDRESS = "https://api.alternative.me/fng/?limit=0&date_format=us"
     
@@ -16,7 +16,7 @@ def getFearAndGreed(date):
     return getAllFearAndGreed()[timestampFormatted]
    
 '''
-Uses the Fear and Greed API to extract all Fear and Greed values available. Returns a dictionary with key as date
+Uses the Fear and Greed API to extract all Fear and Greed values available as a range from 0-1. Returns a dictionary with key as date
 and value the Fear and Greed value on that date.
 '''
 def getAllFearAndGreed():
@@ -26,7 +26,7 @@ def getAllFearAndGreed():
     dataDict = {}
     for singleDay in dataArr:
         timestampFormatted = dateutil.convertTimestamp(singleDay['timestamp'], '%m-%d-%Y', dateutil.DESIRED_DATE_FORMAT)
-        dataDict[timestampFormatted] = int(singleDay['value'])
+        dataDict[timestampFormatted] = mathutil.map(int(singleDay['value']), MIN_FEAR_AND_GREED, MAX_FEAR_AND_GREED, 0, 1)
         
     return dataDict
 
@@ -35,15 +35,15 @@ Uses the Fear and Greed API to extract all Fear and Greed values available in a 
 and value the Fear and Greed value on that date.
 '''
 def getFearAndGreedDateRange(startDate, endDate):
-    fearAndGreedVals = webutil.getPageContent(FEAR_AND_GREED_ADDRESS)
-    jsonUnpacked = json.loads(fearAndGreedVals)
-    dataArr = jsonUnpacked['data']
+    fearAndGreedVals = getAllFearAndGreed()
     dataDict = {}
-    for singleDay in dataArr:
-        timestampDate = datetime.datetime.strptime(singleDay['timestamp'], '%m-%d-%Y')
+
+    for date, data in fearAndGreedVals.items():
+        timestampDate = datetime.datetime.strptime(date, '%Y-%m-%d')
+
         if timestampDate.date() >= startDate.date() and timestampDate.date() <= endDate.date(): # only consider year, month, and day
             timestampFormatted = timestampDate.strftime(dateutil.DESIRED_DATE_FORMAT)
-            dataDict[timestampFormatted] = int(singleDay['value'])
+            dataDict[timestampFormatted] = data
         
     return dataDict
 

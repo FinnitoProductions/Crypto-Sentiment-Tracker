@@ -16,17 +16,9 @@ Represents a piece of data with several values over time. 'values' is a dictiona
 and the corresponding value on that date as the value. 'slider' is the slider modifying the weight of this reading.
 '''
 class HistoricalDataReading:
-    def __init__(self, name, values, slider, minVal=None, maxVal=None):
+    def __init__(self, name, values, slider):
         self.values = values
         self.slider = slider
-        
-        # If no range is specified, manually compute the range using all given values.
-        if minVal == None or maxVal == None:
-            minVal = values[min(values, key=lambda key: values[key])]
-            maxVal = values[max(values, key=lambda key: values[key])]
-            
-        self.minVal = minVal
-        self.maxVal = maxVal
 
 class HistoricalMetricType(Enum):
    FEAR_AND_GREED = fearandgreed.getFearAndGreedDateRange
@@ -68,7 +60,7 @@ class HistoricalSentimentManager:
 
          for historicalReading in self.dataVals:
             convertedDate = date.strftime(dateutil.DESIRED_DATE_FORMAT)
-            sentimentByDate[date] += [(mathutil.map(historicalReading.values[convertedDate], historicalReading.minVal, historicalReading.maxVal, 0, 1) 
+            sentimentByDate[date] += [(historicalReading.values[convertedDate]
                                        if convertedDate in historicalReading.values
                                       else -float('inf'), historicalReading.slider.getReading())] # add tuple with value (-infinity if nothing provided) and weight
 
