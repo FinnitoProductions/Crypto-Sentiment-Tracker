@@ -30,6 +30,23 @@ def getAllFearAndGreed():
         
     return dataDict
 
+'''
+Uses the Fear and Greed API to extract all Fear and Greed values available in a given date range. Returns a dictionary with key as date
+and value the Fear and Greed value on that date.
+'''
+def getFearAndGreedDateRange(startDate, endDate):
+    fearAndGreedVals = webutil.getPageContent(FEAR_AND_GREED_ADDRESS)
+    jsonUnpacked = json.loads(fearAndGreedVals)
+    dataArr = jsonUnpacked['data']
+    dataDict = {}
+    for singleDay in dataArr:
+        timestampDate = datetime.datetime.strptime(singleDay['timestamp'], '%m-%d-%Y')
+        if timestampDate.date() >= startDate.date() and timestampDate.date() <= endDate.date(): # only consider year, month, and day
+            timestampFormatted = timestampDate.strftime(dateutil.DESIRED_DATE_FORMAT)
+            dataDict[timestampFormatted] = int(singleDay['value'])
+        
+    return dataDict
+
 # Displays a given Fear and Greed value (0-100) in a convenient gauge format.
 def displayFearAndGreedNum(val, display=True):
     return gauge.Gauge(labels=['Extreme Fear','Fear','Greed','Extreme Greed'], 

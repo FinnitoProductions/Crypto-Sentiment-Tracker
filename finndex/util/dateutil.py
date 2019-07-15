@@ -11,3 +11,10 @@ https://docs.python.org/2/library/datetime.html#strftime-and-strptime-behavior
 '''
 def convertTimestamp(timestamp, initialFormat, desiredFormat):
     return datetime.datetime.strptime(timestamp, initialFormat).strftime(desiredFormat)
+
+'''
+A generator function (inclusive on both endpoints) to iterate through every date in a given range.
+'''
+def dateRange(startDate, endDate):
+   for i in range(int((endDate - startDate).days) + 1):
+      yield startDate + datetime.timedelta(i)

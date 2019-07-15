@@ -44,6 +44,9 @@ class TimeSeries:
             firstExecution = False
         
         for idx, (valueType, valDictList) in enumerate(self.data.items()):
+            if not isinstance(valDictList, list):
+                valDictList = [valDictList]
+
             if not firstExecution:
                 desiredAxes = self.axes[idx]
             else:
@@ -53,6 +56,8 @@ class TimeSeries:
                     desiredAxes = baseAxis.twinx()
                 self.axes += [desiredAxes]
                 
+            
+            desiredAxes.clear()
             
             desiredAxes.set_ylabel(valueType, color=self.colors[idx])
 
