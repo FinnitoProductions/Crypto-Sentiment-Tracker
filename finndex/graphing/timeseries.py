@@ -34,7 +34,6 @@ class TimeSeries:
             elif timeDifference <= datetime.timedelta(days=30*12):
                 graphedDateFormat = "%Y-%m"
             else:
-                print('here')
                 graphedDateFormat = "%Y"
 
         self.graphedDateFormat = graphedDateFormat

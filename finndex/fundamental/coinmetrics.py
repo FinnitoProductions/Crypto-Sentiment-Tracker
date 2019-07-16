@@ -60,7 +60,7 @@ def getCoinMetricsDateRange(desiredData, startDate, endDate):
         timestampDate = datetime.datetime.strptime(singleDay['time'], "%Y-%m-%dT%H:%M:%S.%fZ")
 
         if timestampDate.date() >= startDate.date() and timestampDate.date() <= endDate.date():
-            valueDict[timestampDate.strftime(dateutil.DESIRED_DATE_FORMAT)] = mathutil.map(float(singleDay['values'][0]), minVal, maxVal, 0, 1)
+            valueDict[timestampDate] = mathutil.map(float(singleDay['values'][0]), minVal, maxVal, 0, 1)
 
     return valueDict
     
@@ -74,5 +74,5 @@ def getAllCoinMetricsData(keyword):
 def plotAllCoinMetricsData():
    for dataKey in list(CoinMetricsData):
       data = getAllCoinMetricsData(dataKey)
-
-      timeseries.plotTimeSeries({dataKey: {'x': list(data.keys()), 'y': list(data.values())}}, title=dataKey.value, dateFormat=dateutil.DESIRED_DATE_FORMAT)
+      print(data)
+      timeseries.TimeSeries(str(dataKey), {dataKey: data})

@@ -36,28 +36,35 @@ class HistoricalSentimentManager:
    def __init__(self, weightedKeywordsList, startDate = datetime.datetime.now() - datetime.timedelta(weeks=4), endDate = datetime.datetime.now(), weights = None, 
                 unweightedKeywordsList = []):
       self.dataVals = []
-      slidersList = []
 
-      for idx, keyword in enumerate(weightedKeywordsList):
-         dataReading = HistoricalDataReading(name=str(keyword), values=keyword.value(startDate=startDate, endDate=endDate), 
-                                   slider=sliders.Slider(str(keyword), widgets.FloatSlider(min=0.0, max=sliders.MAX_VAL, 
-                                                                                           step=sliders.STEP, 
-                                                                                           value=weights[idx] if weights != None else 0.0)))
-         self.dataVals += [dataReading]
-         slidersList += [dataReading.slider]
+      self.startDate = startDate
+      self.endDate = endDate
+      self.weights=weights
+      self.unweightedKeywordsList = unweightedKeywordsList
+      self.weightedKeywordsList = weightedKeywordsList
+
+      slidersList = self.computeDataVals()
 
       if weights == None:
          self.sliderManager = sliders.SliderManager(self.displayGraph, slidersList)
       else:
          self.sliderManager = None
 
-      self.startDate = startDate
-      self.endDate = endDate
-
       self.graph = None
 
-      self.unweightedKeywordsList = unweightedKeywordsList
+      
 
+   def computeDataVals(self):
+      slidersList = []
+      for idx, keyword in enumerate(self.weightedKeywordsList):
+         dataReading = HistoricalDataReading(name=str(keyword), values=keyword.value(startDate=self.startDate, endDate=self.endDate), 
+                                   slider=sliders.Slider(str(keyword), widgets.FloatSlider(min=0.0, max=sliders.MAX_VAL, 
+                                                                                           step=sliders.STEP, 
+                                                                                           value=self.weights[idx] if self.weights != None else 0.0)))
+         self.dataVals += [dataReading]
+         slidersList += [dataReading.slider]
+
+      return slidersList
 
    '''
    Computes the weighted historical sentiment with the date as the key and the historical sentiment on that date as the value.
@@ -90,7 +97,6 @@ class HistoricalSentimentManager:
          sentimentByDate[date] = 0
          for value, weight in values:
             sentimentByDate[date] += value * weight
-      
 
       return sentimentByDate
 

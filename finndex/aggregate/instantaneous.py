@@ -1,4 +1,5 @@
 import datetime
+import functools
 from enum import Enum
 
 import ipywidgets as widgets
@@ -19,8 +20,8 @@ class DataReading:
       self.slider = slider
 
 class StaticMetricType(Enum):
-   FEAR_AND_GREED = fearandgreed.displayFearAndGreedDate
-   TRENDS = trends.displayTrendsDate
+   FEAR_AND_GREED = functools.partial(fearandgreed.displayFearAndGreedDate)
+   TRENDS = functools.partial(trends.displayTrendsDate)
 
 class InstantaneousSentimentManager:
    def __init__(self, keywordsList, date=datetime.datetime.now(), weights=None, displayIntermediates=False):
@@ -28,7 +29,7 @@ class InstantaneousSentimentManager:
       slidersList = []
 
       for idx, keyword in enumerate(keywordsList):
-         dataReading = DataReading(name=str(keyword), gauge=keyword(date=date, display=displayIntermediates), 
+         dataReading = DataReading(name=str(keyword), gauge=keyword.value(date=date, display=displayIntermediates), 
                                    slider=sliders.Slider(str(keyword), widgets.FloatSlider(min=0.0, max=sliders.MAX_VAL, 
                                                                                            step=sliders.STEP, 
                                                                                            value=weights[idx] if weights != None else 0.0)))
