@@ -1,4 +1,11 @@
+'''
+Contains utility functions providing an extension to Python's datetime.
+'''
+
 import datetime
+
+__author__ = "Finn Frankis"
+__copyright__ = "Copyright 2019, Crypticko"
 
 DESIRED_DATE_FORMAT = "%Y-%m-%d"
 
@@ -13,7 +20,7 @@ def convertTimestamp(timestamp, initialFormat, desiredFormat):
     return datetime.datetime.strptime(timestamp, initialFormat).strftime(desiredFormat)
 
 '''
-A generator function (inclusive on both endpoints) to iterate through every date in a given range.
+A generator function (inclusive on both endpoints) to iterate through every date or datetime in a given range.
 '''
 def dateRange(startDate, endDate):
    for i in range(int((endDate - startDate).days) + 1):

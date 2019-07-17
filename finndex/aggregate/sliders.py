@@ -1,4 +1,11 @@
+'''
+Provides a convenient representation of Jupyter's Slider widget and a manager to guarantee that all sliders always add to 1.0
+(for weight sliders).
+'''
 import ipywidgets as widgets
+
+__author__ = "Finn Frankis"
+__copyright__ = "Copyright 2019, Crypticko"
 
 MAX_VAL = 1.0
 STEP = 0.01
@@ -19,7 +26,7 @@ class Slider:
       self.obj.value = newReading
       
    '''
-   Initializes the slider value given the number of sliders in the set. This ensures that all
+   Initializes the slider value given the initial value. This ensures that all
    sliders will start out with equal values.
    '''
    def initSliderValue(self, initVal):

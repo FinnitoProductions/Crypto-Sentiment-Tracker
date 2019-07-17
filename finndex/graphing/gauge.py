@@ -1,3 +1,7 @@
+'''
+Uses MatPlotLib to display a gauge which plots a piece of data with a set minimum and maximum.
+'''
+
 import os
 import sys
 
@@ -8,6 +12,9 @@ from matplotlib import pyplot as plt
 from matplotlib.patches import Circle, Rectangle, Wedge
 
 from finndex.util import mathutil
+
+__author__ = "Finn Frankis"
+__copyright__ = "Copyright 2019, Crypticko"
 
 ARROW_TAIL_RADIUS = 0.015
 
@@ -23,6 +30,9 @@ def rot_text(ang):
     rotation = np.degrees(np.radians(ang) * np.pi / np.pi - np.radians(90))
     return rotation
 
+'''
+Represents a gauge with a set of labels and colors (formatted in hex) corresponding to each of those labels.
+'''
 class Gauge:
     def __init__(self, labels, colors, currentVal, minVal, maxVal, title='', displayGauge=True):
         self.labels = labels

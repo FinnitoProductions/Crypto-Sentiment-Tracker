@@ -1,3 +1,7 @@
+'''
+Uses the CoinMetrics API to retrieve several useful pieces of fundamental data on cryptocurrencies.
+'''
+
 import datetime
 import json
 from enum import Enum
@@ -5,10 +9,12 @@ from enum import Enum
 from finndex.graphing import timeseries
 from finndex.util import dateutil, mathutil, webutil
 
+__author__ = "Finn Frankis"
+__copyright__ = "Copyright 2019, Crypticko"
+
 COIN_METRICS_API_PREFIX = "https://community-api.coinmetrics.io/v2/"
 NETWORK_METRIC_SUFFIX = "assets/%s/metricdata?metrics="
 BITCOIN_ASSET_ID = "btc"
-DAILY_ADDR_METRIC_ID = "AdrActCnt"
 
 COIN_METRICS_TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 

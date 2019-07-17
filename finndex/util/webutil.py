@@ -1,9 +1,15 @@
+'''
+Provides several utility functions for extracting data from websites (including HTML pages as well as JSON files from APIs).
+'''
 from contextlib import closing
 
 from bs4 import BeautifulSoup
 from newsapi import NewsApiClient
 from requests import get
 from requests.exceptions import RequestException
+
+__author__ = "Finn Frankis"
+__copyright__ = "Copyright 2019, Crypticko"
 
 
 # Extracts the content located at any URL.

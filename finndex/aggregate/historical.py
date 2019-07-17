@@ -1,3 +1,7 @@
+'''
+Manages a set of historical data to plot the aggregate sentiment (with variable weight) relative to other values.
+'''
+
 import datetime
 import functools
 from enum import Enum
@@ -12,6 +16,9 @@ from finndex.graphing import timeseries
 from finndex.sentiment import fearandgreed, trends
 from finndex.util import dateutil, mathutil
 
+__author__ = "Finn Frankis"
+__copyright__ = "Copyright 2019, Crypticko"
+
 
 '''
 Represents a piece of data with several values over time. 'values' is a dictionary with the date as the key
@@ -23,6 +30,9 @@ class HistoricalDataReading:
         self.values = values
         self.slider = slider
 
+'''
+Represents all possible values that can be plotted historically. Each value corresponds to a standard data retrieval function.
+'''
 class HistoricalMetricType(Enum):
    FEAR_AND_GREED = functools.partial(fearandgreed.getFearAndGreedDateRange)
    TRENDS = functools.partial(trends.getTrendsDateRange)
@@ -32,6 +42,10 @@ class HistoricalMetricType(Enum):
    MARKET_CAP = functools.partial(coinmetrics.getCoinMetricsDateRange, coinmetrics.CoinMetricsData.MARKET_CAP)
    PRICE_USD = functools.partial(coinmetrics.getCoinMetricsDateRange, coinmetrics.CoinMetricsData.PRICE_USD)
 
+'''
+Computes and plots a set of daily historical sentiment values given a set of keywords. Weights can be modified using sliders;
+if weights are provided in the 'weights' parameter, presents a static graph using those weights.
+'''
 class HistoricalSentimentManager:
    def __init__(self, weightedKeywordsList, startDate = datetime.datetime.now() - datetime.timedelta(weeks=4), endDate = datetime.datetime.now(), weights = None, 
                 unweightedKeywordsList = []):
@@ -52,8 +66,9 @@ class HistoricalSentimentManager:
 
       self.graph = None
 
-      
-
+   '''
+   Generates a list of sliders for and computes the historical values of all desired keywords.
+   '''
    def computeDataVals(self):
       slidersList = []
       for idx, keyword in enumerate(self.weightedKeywordsList):
@@ -65,6 +80,28 @@ class HistoricalSentimentManager:
          slidersList += [dataReading.slider]
 
       return slidersList
+
+   '''
+   Removes any missing data from a weighted dataset by distributing the weight of any missing values (represented by negative infinity)
+   to all subsequent values. Does not modify the passed-in list; returns a modified shallow copy.
+   '''
+   def removeGaps(values):
+      values = values.copy()
+      values.sort() # place all values with -infinity first so they can be dealt with
+
+      # Account for any gaps in the data
+      for i, (value, weight) in enumerate(values):
+         if value == -float('inf'): # no value provided
+            # As long as the last value isn't -infinity (this would mean no data is provided), distribute the
+            # weight of the missing data set to all subsequent values
+            if i != len(values) - 1:
+               weightPerElement = weight / (len(values) - i - 1)
+            values[i] = (0.0, 1.0)
+
+            for j, val in enumerate(values[i+1:], start = i+1):
+               values[j] = (values[j][0], values[j][1] + weightPerElement)
+
+      return values
 
    '''
    Computes the weighted historical sentiment with the date as the key and the historical sentiment on that date as the value.
@@ -81,22 +118,8 @@ class HistoricalSentimentManager:
                                        if date in historicalReading.values
                                       else -float('inf'), historicalReading.slider.getReading())] # add tuple with value (-infinity if nothing provided) and weight
 
-         values = sentimentByDate[date] # values is a list of all sentiment values on a given date
-         values.sort() # place all values with -infinity first so they can be dealt with
+         values = self.removeGaps(sentimentByDate[date])
 
-         # Account for any gaps in the data
-         for i, (value, weight) in enumerate(values):
-            if value == -float('inf'): # no value provided
-               # As long as the last value isn't -infinity (this would mean no data is provided), distribute the
-               # weight of the missing data set to all subsequent values
-               if i != len(values) - 1:
-                  weightPerElement = weight / (len(values) - i - 1)
-               values[i] = (0.0, 1.0)
-
-               for j, val in enumerate(values[i+1:], start = i+1):
-                  values[j] = (values[j][0], values[j][1] + weightPerElement)
-
-         
          sentimentByDate[date] = 0
 
          # Find the weighted average of sentiment on a given day

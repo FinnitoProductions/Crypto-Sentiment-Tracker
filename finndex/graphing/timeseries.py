@@ -1,3 +1,7 @@
+'''
+Contains a TimeSeries class allowing for a set of historical data to be plotted over time.
+'''
+
 import datetime
 
 import matplotlib
@@ -7,6 +11,9 @@ from matplotlib import pyplot as plt
 
 from finndex.util import dateutil
 
+__author__ = "Finn Frankis"
+__copyright__ = "Copyright 2019, Crypticko"
+
 
 '''
 Represents an easily modifiable time series. 
@@ -15,10 +22,8 @@ The data is provided in 'data', where each key (string) represents the type of v
 and the corresponding value is an list of dictionaries where the key is date and the value is the corresponding value on that day.
 Each list represents a single axis, thus all the data in a list will be plotted on the same axis. Up to 2 axes are supported.
 
-dateFormat (string) represents the format of all the incoming x-values. graphDateFormat (string) represents the format in which the given
+dataDateFormat (string) represents the format of all the incoming x-values. graphDateFormat (string) represents the format in which the given
 dates will be displayed on the x-axis. 
-
-If seeking to modify an existing graph, existingGraph represents the TimeSeries which was already produced by this function.
 '''
 class TimeSeries:
     def __init__(self, title, data, colors=['tab:red', 'tab:blue', 'tab:green'], dataDateFormat=dateutil.DESIRED_DATE_FORMAT, graphedDateFormat = None, yMin=None, yMax=None):
@@ -46,6 +51,9 @@ class TimeSeries:
         
         self.plotTimeSeries()
     
+    '''
+    Generates the graph using the data specified in the constructor, or, if already generated, updates it to a new data set.
+    '''
     def plotTimeSeries(self):
         if self.fig == None: # generating the graph for the first time
             self.fig, baseAxis = plt.subplots()

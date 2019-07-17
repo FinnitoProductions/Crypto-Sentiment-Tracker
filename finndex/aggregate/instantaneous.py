@@ -1,3 +1,7 @@
+'''
+Manages a set of instantaneous data to plot the current sentiment on a gauge (with variable weight).
+'''
+
 import datetime
 import functools
 from enum import Enum
@@ -11,18 +15,29 @@ from finndex.graphing import gauge
 from finndex.sentiment import fearandgreed, nlp, trends
 from finndex.util import dateutil, mathutil, webutil
 
+__author__ = "Finn Frankis"
+__copyright__ = "Copyright 2019, Crypticko"
 
-# Represents a static data reading represented by a single gauge and weighted by a slider.
+
+# Represents a static named data reading represented by a single gauge and weighted by a slider.
 class DataReading:
    def __init__(self, name, gauge, slider):
       self.name = name
       self.gauge = gauge
       self.slider = slider
 
+'''
+Represents all possible values that can be plotted instantaneously. Each value corresponds to a standard data retrieval function.
+'''
 class StaticMetricType(Enum):
    FEAR_AND_GREED = functools.partial(fearandgreed.displayFearAndGreedDate)
    TRENDS = functools.partial(trends.displayTrendsDate)
 
+'''
+Computes and displays on a gauge instantaneous sentiment value given a set of keywords. Weights can be modified using sliders;
+if weights are provided in the 'weights' parameter, presents a static gauge using those weights. If the 'displayIntermediates'
+parameter is True, displays gauges for each individual value above the aggregate gauge.
+'''
 class InstantaneousSentimentManager:
    def __init__(self, keywordsList, date=datetime.datetime.now(), weights=None, displayIntermediates=False):
       self.dataVals = []
@@ -46,6 +61,9 @@ class InstantaneousSentimentManager:
       else:
          self.sliderManager = None
 
+   '''
+   Retrieves the data reading represented by a given name.
+   '''
    def getDataReading(self, name):
       return [reading for reading in self.dataVals if reading.name == name][0]
 

@@ -1,8 +1,15 @@
+'''
+Extracts data from the Fear and Greed API and displays it instantaneously and provides a historical representation in a dictionary.
+'''
+
 import datetime
 import json
 
 from finndex.graphing import gauge
 from finndex.util import dateutil, mathutil, webutil
+
+__author__ = "Finn Frankis"
+__copyright__ = "Copyright 2019, Crypticko"
 
 FEAR_AND_GREED_ADDRESS = "https://api.alternative.me/fng/?limit=0&date_format=us"
     
