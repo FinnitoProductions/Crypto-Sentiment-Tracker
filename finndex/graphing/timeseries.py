@@ -78,8 +78,10 @@ class TimeSeries:
 
                 formattedDates = []
                 for date in dates:
-                    if not isinstance(date, datetime.datetime):
+                    if isinstance(date, str):
                         formattedDates += [datetime.datetime.strptime(date, self.dataDateFormat)]
+                    elif isinstance(date, datetime.date):
+                        formattedDates += [datetime.datetime.combine(date, datetime.time())]
                     else:
                         formattedDates += [date]
                     

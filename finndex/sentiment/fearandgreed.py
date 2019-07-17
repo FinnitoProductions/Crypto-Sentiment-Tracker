@@ -42,8 +42,7 @@ def getFearAndGreedDateRange(startDate, endDate):
         timestampDate = datetime.datetime.strptime(date, '%Y-%m-%d')
 
         if timestampDate.date() >= startDate.date() and timestampDate.date() <= endDate.date(): # only consider year, month, and day
-            timestampFormatted = timestampDate.strftime(dateutil.DESIRED_DATE_FORMAT)
-            dataDict[timestampFormatted] = data
+            dataDict[timestampDate.date()] = data
         
     return dataDict
 

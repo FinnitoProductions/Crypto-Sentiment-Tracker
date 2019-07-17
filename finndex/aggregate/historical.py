@@ -72,20 +72,23 @@ class HistoricalSentimentManager:
    def getHistoricalSentiment(self):
       sentimentByDate = {}
    
-      for date in dateutil.dateRange(self.startDate, self.endDate):
+      for date in dateutil.dateRange(self.startDate.date(), self.endDate.date()):
          sentimentByDate[date] = []
 
+         # Populate the sentiment dictionary with date pointing to a list of every corresponding historical sentiment value
          for historicalReading in self.dataVals:
-            convertedDate = date.strftime(dateutil.DESIRED_DATE_FORMAT)
-            sentimentByDate[date] += [(historicalReading.values[convertedDate]
-                                       if convertedDate in historicalReading.values
+            sentimentByDate[date] += [(historicalReading.values[date]
+                                       if date in historicalReading.values
                                       else -float('inf'), historicalReading.slider.getReading())] # add tuple with value (-infinity if nothing provided) and weight
 
-         values = sentimentByDate[date]
+         values = sentimentByDate[date] # values is a list of all sentiment values on a given date
          values.sort() # place all values with -infinity first so they can be dealt with
 
+         # Account for any gaps in the data
          for i, (value, weight) in enumerate(values):
             if value == -float('inf'): # no value provided
+               # As long as the last value isn't -infinity (this would mean no data is provided), distribute the
+               # weight of the missing data set to all subsequent values
                if i != len(values) - 1:
                   weightPerElement = weight / (len(values) - i - 1)
                values[i] = (0.0, 1.0)
@@ -95,6 +98,8 @@ class HistoricalSentimentManager:
 
          
          sentimentByDate[date] = 0
+
+         # Find the weighted average of sentiment on a given day
          for value, weight in values:
             sentimentByDate[date] += value * weight
 
@@ -110,12 +115,14 @@ class HistoricalSentimentManager:
    '''
    def displayGraph(self):
       data = {'aggregateSentiment': self.getHistoricalSentiment()}
+
+      # Overlay any additional keywords provided
       for additionalKeyword in self.unweightedKeywordsList:
          value = additionalKeyword.value(startDate = self.startDate, endDate = self.endDate)
          if len(self.unweightedKeywordsList) == 1:
-            data[additionalKeyword] = value
+            data[additionalKeyword] = value # If there is only one keyword, the y-axis will be labeled with that keyword
          else:
-            ADDITIONAL_DATA_KEY = 'Additional Data'
+            ADDITIONAL_DATA_KEY = 'Additional Data' # If there are multiple terms, use a more general term
             if not ADDITIONAL_DATA_KEY in data:
                data[ADDITIONAL_DATA_KEY] = [value]
             else:
@@ -129,46 +136,6 @@ class HistoricalSentimentManager:
             display(self.sliderManager.generateDisplayBox())
       else:
          self.graph.data = data
-         self.graph.plotTimeSeries()
+         self.graph.plotTimeSeries() # updates the graph
 
       return self.graph
-
-   # valueDict = {'fearAndGreed': HistoricalDataReading(values=getAllFearAndGreed(), 
-   #                               slider=Slider(obj=widgets.FloatSlider(min=0.0, max=MAX_VAL, step=STEP, value=0.0),
-   #                                                       editedManually=False,
-   #                                                       description="Fear and Greed Weight"), minVal = MIN_FEAR_AND_GREED,
-   #                                                 maxVal = MAX_FEAR_AND_GREED),
-   #             'trends': HistoricalDataReading(values=getTrendsDataByDay("Bitcoin", datetime.datetime.now() - datetime.timedelta(days=35), datetime.datetime.now()), 
-   #                               slider=Slider(obj=widgets.FloatSlider(min=0.0, max=MAX_VAL, step=STEP, value=0.0),
-   #                                                       editedManually=False,
-   #                                                       description="Trends Weight")),
-   #             'addresses': HistoricalDataReading(values=getAllCoinMetricsData(CoinMetricsData.DAILY_ADDRESSES),
-   #                                              slider=Slider(obj=widgets.FloatSlider(min=0.0, max=MAX_VAL, step=STEP, value=0.0),
-   #                                                       editedManually=False,
-   #                                                       description="Addresses Weight")),
-   #             'transactions': HistoricalDataReading(values=getAllCoinMetricsData(CoinMetricsData.TRANSACTION_CNT),
-   #                                              slider=Slider(obj=widgets.FloatSlider(min=0.0, max=MAX_VAL, step=STEP, value=0.0),
-   #                                                       editedManually=False,
-   #                                                       description="Transaction Weight"))}
-
-
-   # earliestDate, latestDate = getDateRange(valueDict)
-   # priceData = getAllCoinMetricsData(CoinMetricsData.PRICE_USD)
-
-   # newPriceData = {}
-   # # Ensures that only elements within the computed date range can be added.
-   # for date, val in priceData.items():
-   #    convertedDate = datetime.datetime.strptime(date, DESIRED_DATE_FORMAT) 
-   #    if convertedDate >= earliestDate and convertedDate <= latestDate:
-   #       newPriceData[date] = val 
-
-   # for valueType, data in valueDict.items():
-   #    data.slider.initSliderValue(len(valueDict))
-
-   # graph = updateGraph(valueDict, Price=newPriceData)
-
-   # sliderManager = SliderManager(editedFunction=updateGraph, valueDict=valueDict, displayedObj=graph)
-   # for valueType, data in valueDict.items():
-   #    sliderManager.addSlider(name=valueType, slider=data.slider)
-
-   # display(generateDisplayBox([data.slider for key, data in valueDict.items()]))

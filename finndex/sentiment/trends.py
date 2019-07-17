@@ -48,13 +48,12 @@ def getTrendsDateRange(startDate, endDate, keyword="Bitcoin"):
 
    dateDict = {}
    for date, value in trendsData.items():
-      dateString = date.strftime("%Y-%m-%d")
-      if not dateString in dateDict:
-         dateDict[dateString] = [value]
+      if not date in dateDict:
+         dateDict[date] = [value]
       else:
-         dateDict[dateString] += [value]
+         dateDict[date] += [value]
          
-   return {date:numpy.average(vals) for date, vals in dateDict.items()}
+   return {date.date():numpy.average(vals) for date, vals in dateDict.items()}
 
 # Determines the Google trends data on a given date.
 def getTrendsDate(date=datetime.datetime.now(), keyword="Bitcoin"):
