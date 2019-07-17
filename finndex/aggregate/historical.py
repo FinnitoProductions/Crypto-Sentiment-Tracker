@@ -8,13 +8,12 @@ from enum import Enum
 
 import ipywidgets as widgets
 import numpy as np
-from IPython.display import display
-
 from finndex.aggregate import sliders
 from finndex.fundamental import coinmetrics
 from finndex.graphing import timeseries
 from finndex.sentiment import fearandgreed, trends
 from finndex.util import dateutil, mathutil
+from IPython.display import display
 
 __author__ = "Finn Frankis"
 __copyright__ = "Copyright 2019, Crypticko"
@@ -47,7 +46,7 @@ Computes and plots a set of daily historical sentiment values given a set of key
 if weights are provided in the 'weights' parameter, presents a static graph using those weights.
 '''
 class HistoricalSentimentManager:
-   def __init__(self, weightedKeywordsList, startDate = datetime.datetime.now() - datetime.timedelta(weeks=4), endDate = datetime.datetime.now(), weights = None, 
+   def __init__(self, weightedKeywordsList, startDate = dateutil.getCurrentDateTime() - datetime.timedelta(weeks=4), endDate = dateutil.getCurrentDateTime(), weights = None, 
                 unweightedKeywordsList = []):
       self.dataVals = []
 

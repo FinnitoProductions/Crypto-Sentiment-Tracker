@@ -8,12 +8,11 @@ from enum import Enum
 
 import ipywidgets as widgets
 import numpy as np
-from IPython.display import display
-
 from finndex.aggregate import sliders
 from finndex.graphing import gauge
 from finndex.sentiment import fearandgreed, nlp, trends
 from finndex.util import dateutil, mathutil, webutil
+from IPython.display import display
 
 __author__ = "Finn Frankis"
 __copyright__ = "Copyright 2019, Crypticko"
@@ -39,7 +38,7 @@ if weights are provided in the 'weights' parameter, presents a static gauge usin
 parameter is True, displays gauges for each individual value above the aggregate gauge.
 '''
 class InstantaneousSentimentManager:
-   def __init__(self, keywordsList, date=datetime.datetime.now(), weights=None, displayIntermediates=False):
+   def __init__(self, keywordsList, date=dateutil.getCurrentDateTime(), weights=None, displayIntermediates=False):
       self.dataVals = []
       slidersList = []
 

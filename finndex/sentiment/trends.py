@@ -1,10 +1,9 @@
 import datetime
 
 import numpy
-from pytrends.request import TrendReq
-
 from finndex.graphing import gauge
-from finndex.util import mathutil
+from finndex.util import dateutil, mathutil
+from pytrends.request import TrendReq
 
 MIN_TRENDS_VAL = 0
 MAX_TRENDS_VAL = 100
@@ -56,11 +55,11 @@ def getTrendsDateRange(startDate, endDate, keyword="Bitcoin"):
    return {date.date():numpy.average(vals) for date, vals in dateDict.items()}
 
 # Determines the Google trends data on a given date.
-def getTrendsDate(date=datetime.datetime.now(), keyword="Bitcoin"):
+def getTrendsDate(date=dateutil.getCurrentDateTime(), keyword="Bitcoin"):
    startDate = datetime.datetime(year=date.year, month=date.month, day=date.day)
    trendsData = getTrendsDataRaw(keyword, startDate, startDate + datetime.timedelta(days=1))
    
    return numpy.average(trendsData)
 
-def displayTrendsDate(date=datetime.datetime.now(), display=True, keyword="Bitcoin"):
+def displayTrendsDate(date=dateutil.getCurrentDateTime(), display=True, keyword="Bitcoin"):
    return gauge.displayNeutralGauge(getTrendsDate(date=date, keyword=keyword), MIN_TRENDS_VAL, MAX_TRENDS_VAL, "Google Trends", display=display)

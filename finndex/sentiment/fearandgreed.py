@@ -60,5 +60,5 @@ def displayFearAndGreedNum(val, display=True):
                  maxVal = 1, title='Fear and Greed', displayGauge=display)
 
 # Displays the Fear and Greed value from a given date in a convenient gauge format.
-def displayFearAndGreedDate(date=datetime.datetime.now(), display=True):
+def displayFearAndGreedDate(date=dateutil.getCurrentDateTime(), display=True):
     return displayFearAndGreedNum(getFearAndGreed(date), display)
