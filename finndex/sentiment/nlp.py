@@ -1,5 +1,6 @@
 '''
-Uses Stanford's NLP library to analyze and the sentiment of a block of text.
+Uses Stanford's NLP library to analyze and the sentiment of a block of text and provides functions to stop and start the
+server.
 '''
 
 import os
@@ -47,3 +48,7 @@ def displaySentimentNum(sentimentVal):
 # Computes the sentiment value of a given piece of text and displays it as a gauge.
 def displaySentimentTxt(text):
     return displaySentimentNum(findSentiment(text))    
+
+# Kills the server running on a given port. 
+def stopServer(port):
+   exec('kill $(lsof -ti tcp:{})'.format(port))
