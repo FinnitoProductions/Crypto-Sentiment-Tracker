@@ -13,11 +13,19 @@ __author__ = "Finn Frankis"
 __copyright__ = "Copyright 2019, Crypticko"
 
 COIN_METRICS_API_PREFIX = "https://community-api.coinmetrics.io/v2/"
-NETWORK_METRIC_SUFFIX = "assets/%s/metricdata?metrics="
+NETWORK_METRIC_SUFFIX = "assets/{}/metricdata?metrics="
 BITCOIN_ASSET_ID = "btc"
 
 COIN_METRICS_TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
+# Represents an enum of several cryptocurrencies corresponding to their ticker symbols.
+class Cryptocurrencies(Enum):
+    BITCOIN = "BTC"
+    ETHEREUM = "ETH"
+    BITCOIN_CASH = "BCH"
+    RIPPLE = "XRP"
+    LITECOIN = "LTC"
+    DOGECOIN = "DOGE"
 
 # Represents an enum containing several possible keywords which can be used with the CoinMetrics API.
 class CoinMetricsData(Enum):
@@ -28,7 +36,8 @@ class CoinMetricsData(Enum):
     DAILY_ADDRESSES = "AdrActCnt"
     
 '''
-Retrieves a dictionary containing the CoinMetrics data across all time for a given set of statistics.
+Retrieves a dictionary containing the CoinMetrics data across all time for a given set of statistics for a given
+set of cryptocurrencies. 
 
 Valid and retrievable statistics are listed in the CoinMetricsData class.
 
@@ -37,47 +46,53 @@ which points to an list of dictionaries. Each dictionary in this list contains a
 the microsecond and a key 'values' pointing to a list of string values. The list is ordered in the same fashion
 as the 'metrics' list.
 '''
-def getCoinMetricsDict(*keywords):
-    desiredMetrics = COIN_METRICS_API_PREFIX + NETWORK_METRIC_SUFFIX % BITCOIN_ASSET_ID
-    for keyword in keywords:
-        desiredMetrics += keyword.value + ","
-    desiredMetrics = desiredMetrics[:-1] # remove final comma
+def getCoinMetricsDict(currenciesList, metricsList):
+    returnDict = {}
+
+    for currency in currenciesList:
+        returnDict[currency.value] = {}
+        
+        desiredMetrics = COIN_METRICS_API_PREFIX + NETWORK_METRIC_SUFFIX.format(currency.value.lower())
+        for keyword in metricsList:
+            desiredMetrics += keyword.value + ","
+        desiredMetrics = desiredMetrics[:-1] # remove final comma
+        
+        loadedPageData = json.loads(webutil.getPageContent(desiredMetrics))['metricData']
+        metricsListRetrieved = loadedPageData['metrics']
+        dataSet = loadedPageData['series']
+        
+        for dataDict in dataSet:
+            valueDict = {CoinMetricsData(metricsListRetrieved[idx]):float(value) 
+                     for idx, value in enumerate(dataDict['values'])}
+            returnDict[currency.value][datetime.datetime.strptime(dataDict['time'], 
+                                                                  COIN_METRICS_TIMESTAMP_FORMAT)] = valueDict
+    return returnDict
+
+'''
+Retrieves from CoinMetrics a set of metrics (from [0, 1]) of a given set of currencies (type Cryptocurrencies) 
+from a given date range.
+'''
+def getCoinMetricsDateRange(currenciesList, metricsList, startDate, endDate):
+    dataDict = getCoinMetricsDict(currenciesList, metricsList)
     
-    return json.loads(webutil.getPageContent(desiredMetrics))['metricData']
-
-# Retrieves from CoinMetrics a metric of a given keyword 'desiredData' (type CoinMetricsData) from a given date.
-def getCoinMetricsData(desiredData, date):
-    dataDict = getCoinMetricsDict(desiredData)
+    newDict = {}
+    for currency, values in dataDict.items():
+        numMetrics = len(values[list(values.keys())[0]])
+        
+        metrics = {}
+        for metric in metricsList:
+            metrics[metric] = (min(val[metric] for val in values.values()), max(val[metric] for val in values.values()))
+            
+        newDict[currency] = {}
+        
+        for date, metricsDict in values.items():
+            if date.date() >= startDate.date() and date.date() <= endDate.date():
+                newDict[currency][date] = {metric:mathutil.map(metricsDict[metric], minVal, maxVal, 0, 1) for metric, (minVal, maxVal) in metrics.items()}
+                
+    return newDict
     
-    timestampFormatted = "%04d-%02d-%02d" % (date.year, date.month, date.day)
-
-    return [singleDay['values'][0] for singleDay in dataDict['series'] 
-            if timestampFormatted in singleDay['time']][0]
-
-# Retrieves from CoinMetrics a metric (from [0, 1]) of a given keyword 'desiredData' (type CoinMetricsData) from a given date range.
-def getCoinMetricsDateRange(desiredData, startDate, endDate):
-    dataDict = getCoinMetricsDict(desiredData)
-
-    minVal = min(float(singleDay['values'][0]) for singleDay in dataDict['series'])
-    maxVal = max(float(singleDay['values'][0]) for singleDay in dataDict['series'])
-
-    valueDict = {}
-    for singleDay in dataDict['series']:
-        timestampDate = datetime.datetime.strptime(singleDay['time'], COIN_METRICS_TIMESTAMP_FORMAT)
-
-        if timestampDate.date() >= startDate.date() and timestampDate.date() <= endDate.date():
-            valueDict[timestampDate.date()] = mathutil.map(float(singleDay['values'][0]), minVal, maxVal, 0, 1)
-
-    return valueDict
-    
-
-# Retrieves from CoinMetrics a metric of a given keyword 'desiredData' (type CoinMetricsData) across all time.
-def getAllCoinMetricsData(keyword):
-    data = getCoinMetricsDict(keyword)['series']
-    return {datetime.datetime.strptime(singleDay['time'], COIN_METRICS_TIMESTAMP_FORMAT):float(singleDay['values'][0]) for singleDay in data}
-
-# Plots all data available from CoinMetrics across time.
-def plotAllCoinMetricsData():
-   for dataKey in list(CoinMetricsData):
-      data = getAllCoinMetricsData(dataKey)
-      timeseries.TimeSeries(str(dataKey), {dataKey: data})
+# Plots all data available from CoinMetrics across time for a given currency.
+def plotAllCoinMetricsData(currency, startDate=dateutil.getCurrentDateTime() - datetime.timedelta(days=1000), endDate=dateutil.getCurrentDateTime()):
+    for dataKey in list(CoinMetricsData):
+        data = getCoinMetricsDateRange([currency], [dataKey], startDate, endDate)[currency.value]
+        timeseries.TimeSeries("{}: {}".format(str(currency), str(dataKey)), {dataKey: {date:values[list(values.keys())[0]] for date, values in data.items()}})
