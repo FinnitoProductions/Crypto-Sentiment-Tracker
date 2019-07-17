@@ -1,14 +1,14 @@
 from setuptools import setup
 
 setup(name='finndex',
-      version='0.1',
+      version='0.1.1',
       description='A useful tool for crypto analysts providing several metrics on various cryptocurrencies.',
       url='https://github.com/FinnitoProductions/Crypto-Sentiment-Tracker',
-      download_url='https://github.com/FinnitoProductions/finndex/archive/v0.1-alpha.tar.gz',
+      download_url='https://github.com/FinnitoProductions/finndex/archive/v0.1.1-alpha.tar.gz',
       author='Finn Frankis',
       author_email='finn@teachmy.com',
       license='MIT',
-      packages=['finndex'],
+      packages=['finndex', 'finndex.graphing', 'finndex.util', 'finndex.sentiment', 'finndex.fundamental', 'finndex.aggregate'],
       install_requires=['beautifulsoup4',
                         'ipykernel',
                         'ipython',
