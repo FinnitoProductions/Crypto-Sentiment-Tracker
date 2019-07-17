@@ -84,6 +84,7 @@ class HistoricalSentimentManager:
    Removes any missing data from a weighted dataset by distributing the weight of any missing values (represented by negative infinity)
    to all subsequent values. Does not modify the passed-in list; returns a modified shallow copy.
    '''
+   @staticmethod
    def removeGaps(values):
       values = values.copy()
       values.sort() # place all values with -infinity first so they can be dealt with
@@ -117,7 +118,7 @@ class HistoricalSentimentManager:
                                        if date in historicalReading.values
                                       else -float('inf'), historicalReading.slider.getReading())] # add tuple with value (-infinity if nothing provided) and weight
 
-         values = self.removeGaps(sentimentByDate[date])
+         values = HistoricalSentimentManager.removeGaps(sentimentByDate[date])
 
          sentimentByDate[date] = 0
 

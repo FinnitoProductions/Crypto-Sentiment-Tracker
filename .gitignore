@@ -105,5 +105,6 @@ venv.bak/
 
 # Virtual Environment
 cryptickoenv/**
+libtesting/**
 
 .vscode/
