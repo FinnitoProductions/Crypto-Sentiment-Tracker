@@ -4,7 +4,6 @@ Provides several utility functions for extracting data from websites (including 
 from contextlib import closing
 
 from bs4 import BeautifulSoup
-from newsapi import NewsApiClient
 from requests import get
 from requests.exceptions import RequestException
 
