@@ -29,7 +29,7 @@ class DataInfo(flask_restful.Resource):
          instantaneousManager = instantaneous.InstantaneousSentimentManager([instantaneous.StaticMetricType.FEAR_AND_GREED, 
                                                        instantaneous.StaticMetricType.TRENDS])
          return instantaneousManager.getReading(), API_OK_VAL
-      print(type(data))
+
       return "Data type not found.", API_FAILED_VAL
 
 def setupApi(locName):

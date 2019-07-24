@@ -6,10 +6,9 @@ import datetime
 
 import matplotlib
 import numpy as np
+from finndex.util import dateutil
 from matplotlib import cm
 from matplotlib import pyplot as plt
-
-from finndex.util import dateutil
 
 __author__ = "Finn Frankis"
 __copyright__ = "Copyright 2019, Crypticko"
@@ -26,7 +25,7 @@ dataDateFormat (string) represents the format of all the incoming x-values. grap
 dates will be displayed on the x-axis. 
 '''
 class TimeSeries:
-    def __init__(self, title, data, colors=['tab:red', 'tab:blue', 'tab:green'], dataDateFormat=dateutil.DESIRED_DATE_FORMAT, graphedDateFormat = None, yMin=None, yMax=None):
+    def __init__(self, title, data, colors=['tab:red', 'tab:blue', 'tab:green'], dataDateFormat=dateutil.DESIRED_DATE_FORMAT, graphedDateFormat = None, yMin=None, yMax=None, fileName=False):
         self.title = title
         self.data = data
         self.dataDateFormat = dataDateFormat
@@ -49,7 +48,10 @@ class TimeSeries:
         self.fig = None
         self.axes = []
         
+        self.fileName = fileName 
+
         self.plotTimeSeries()
+
     
     '''
     Generates the graph using the data specified in the constructor, or, if already generated, updates it to a new data set.
@@ -105,3 +107,6 @@ class TimeSeries:
             
         self.fig.tight_layout()
         plt.show()
+
+        if self.fileName:
+            self.fig.savefig(self.fileName, dpi=200)

@@ -7,11 +7,10 @@ import sys
 
 import matplotlib
 import numpy as np
+from finndex.util import mathutil
 from matplotlib import cm
 from matplotlib import pyplot as plt
 from matplotlib.patches import Circle, Rectangle, Wedge
-
-from finndex.util import mathutil
 
 __author__ = "Finn Frankis"
 __copyright__ = "Copyright 2019, Crypticko"
@@ -34,7 +33,7 @@ def rot_text(ang):
 Represents a gauge with a set of labels and colors (formatted in hex) corresponding to each of those labels.
 '''
 class Gauge:
-    def __init__(self, labels, colors, currentVal, minVal, maxVal, title='', displayGauge=True):
+    def __init__(self, labels, colors, currentVal, minVal, maxVal, title='', displayGauge=True, fileName=False):
         self.labels = labels
         self.colors = colors
         self.currentVal = currentVal
@@ -46,6 +45,8 @@ class Gauge:
 
         self.fig = None
         self.ax = None
+
+        self.fileName = fileName
         
         if displayGauge:
             self.generateGauge()
@@ -141,6 +142,9 @@ class Gauge:
             self.fig.canvas.draw_idle()
         
         self.gaugeGenerated = True
+
+        if self.fileName:
+            self.fig.savefig(self.fileName, dpi=200)
 
         return (self.fig, self.ax, self.arrow)
 
