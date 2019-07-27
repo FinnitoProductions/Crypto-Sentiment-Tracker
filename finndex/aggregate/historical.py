@@ -75,9 +75,13 @@ class HistoricalSentimentManager:
                                                                                              step=sliders.STEP, 
                                                                                              value=self.weights[idx] if self.weights != None else 0.0))
          valuesDict = keyword.value(startDate=self.startDate, endDate=self.endDate, currenciesList=self.currenciesList)
-         print(valuesDict)
+
          for currency in self.currenciesList:
-            dataReading = HistoricalDataReading(name=str(keyword), values=valuesDict[currency], 
+            values = valuesDict[currency]
+
+            values = {(date.date() if isinstance(date, datetime.datetime) else date):val for date, val in values.items()}
+
+            dataReading = HistoricalDataReading(name=str(keyword), values=values, 
                                     slider=slider)
             if not currency in self.dataDict:
                self.dataDict[currency] = [dataReading]

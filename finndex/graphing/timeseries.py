@@ -30,8 +30,10 @@ class TimeSeries:
         self.data = data
         self.dataDateFormat = dataDateFormat
 
+        print(data)
         if graphedDateFormat == None:
-            timeDifference = max(data[list(data.keys())[0]]) - min(data[list(data.keys())[0]])
+            firstDataSet = data[list(data.keys())[0]]
+            timeDifference = max(firstDataSet[list(firstDataSet.keys())[0]]) - min(firstDataSet[list(firstDataSet.keys())[0]])
 
             if timeDifference <= datetime.timedelta(days=30*6):
                 graphedDateFormat = "%m-%d"
@@ -57,6 +59,7 @@ class TimeSeries:
     Generates the graph using the data specified in the constructor, or, if already generated, updates it to a new data set.
     '''
     def plotTimeSeries(self):
+        colors = list(self.colors) # duplicate so that colors can be removed as they are used
         if self.fig == None: # generating the graph for the first time
             self.fig, baseAxis = plt.subplots()
             firstExecution = True
@@ -65,9 +68,6 @@ class TimeSeries:
             firstExecution = False
         
         for idx, (valueType, valDictList) in enumerate(self.data.items()):
-            if not isinstance(valDictList, list):
-                valDictList = [valDictList]
-
             if not firstExecution:
                 desiredAxes = self.axes[idx]
             else:
@@ -82,7 +82,7 @@ class TimeSeries:
 
             desiredAxes.set_ylabel(valueType, color=self.colors[idx])
 
-            for valDict in valDictList:
+            for key, valDict in valDictList.items():
                 dates = [date for date in valDict]
                 values = [val for val in valDict.values()]
 
@@ -96,7 +96,13 @@ class TimeSeries:
                         formattedDates += [date]
                     
                 dates = matplotlib.dates.date2num(formattedDates)
-                desiredAxes.plot(formattedDates, values, color = self.colors[idx])
+                desiredAxes.plot(formattedDates, values, color = colors[0], label=str(key))
+
+                del colors[0] # remove first color to shift all left
+                
+            if len(valDictList) > 1: # multiple curves plotted on axes
+                desiredAxes.legend()
+
             desiredAxes.set_title(self.title)
             desiredAxes.xaxis.set_major_formatter(matplotlib.dates.DateFormatter(self.graphedDateFormat))
             
