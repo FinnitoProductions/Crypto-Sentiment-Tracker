@@ -2,7 +2,7 @@ import datetime
 
 import numpy
 from finndex.graphing import gauge
-from finndex.util import dateutil, mathutil
+from finndex.util import cryptocurrencies, dateutil, mathutil
 from pytrends.request import TrendReq
 
 MIN_TRENDS_VAL = 0
@@ -42,17 +42,21 @@ per day.
 
 Returns a dictionary with key as date and value the trends data on that date.
 '''
-def getTrendsDateRange(startDate, endDate, keyword="Bitcoin"):
-   trendsData = getTrendsData(keyword, startDate, endDate)
+def getTrendsDateRange(startDate, endDate, currenciesList=[cryptocurrencies.Cryptocurrencies.BITCOIN]):
+   currenciesDict = {}
+   for currency in currenciesList:
+      trendsData = getTrendsData(currency.value, startDate, endDate)
 
-   dateDict = {}
-   for date, value in trendsData.items():
-      if not date in dateDict:
-         dateDict[date] = [value]
-      else:
-         dateDict[date] += [value]
-         
-   return {date.date():numpy.average(vals) for date, vals in dateDict.items()}
+      dateDict = {}
+      for date, value in trendsData.items():
+         if not date in dateDict:
+            dateDict[date] = [value]
+         else:
+            dateDict[date] += [value]
+            
+      currenciesDict[currency] = {date.date():numpy.average(vals) for date, vals in dateDict.items()}
+
+   return currenciesDict
 
 # Determines the Google trends data on a given date.
 def getTrendsDate(date=dateutil.getCurrentDateTime(), keyword="Bitcoin"):

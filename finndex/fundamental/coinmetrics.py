@@ -7,25 +7,15 @@ import json
 from enum import Enum
 
 from finndex.graphing import timeseries
-from finndex.util import dateutil, mathutil, webutil
+from finndex.util import cryptocurrencies, dateutil, mathutil, webutil
 
 __author__ = "Finn Frankis"
 __copyright__ = "Copyright 2019, Crypticko"
 
 COIN_METRICS_API_PREFIX = "https://community-api.coinmetrics.io/v2/"
 NETWORK_METRIC_SUFFIX = "assets/{}/metricdata?metrics="
-BITCOIN_ASSET_ID = "btc"
 
 COIN_METRICS_TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
-
-# Represents an enum of several cryptocurrencies corresponding to their ticker symbols.
-class Cryptocurrencies(Enum):
-    BITCOIN = "BTC"
-    ETHEREUM = "ETH"
-    BITCOIN_CASH = "BCH"
-    RIPPLE = "XRP"
-    LITECOIN = "LTC"
-    DOGECOIN = "DOGE"
 
 # Represents an enum containing several possible keywords which can be used with the CoinMetrics API.
 class CoinMetricsData(Enum):
@@ -50,7 +40,7 @@ def getCoinMetricsDict(currenciesList, metricsList):
     returnDict = {}
 
     for currency in currenciesList:
-        returnDict[currency.value] = {}
+        returnDict[currency] = {}
         
         desiredMetrics = COIN_METRICS_API_PREFIX + NETWORK_METRIC_SUFFIX.format(currency.value.lower())
         for keyword in metricsList:
@@ -64,7 +54,7 @@ def getCoinMetricsDict(currenciesList, metricsList):
         for dataDict in dataSet:
             valueDict = {CoinMetricsData(metricsListRetrieved[idx]):float(value) 
                      for idx, value in enumerate(dataDict['values'])}
-            returnDict[currency.value][datetime.datetime.strptime(dataDict['time'], 
+            returnDict[currency][datetime.datetime.strptime(dataDict['time'], 
                                                                   COIN_METRICS_TIMESTAMP_FORMAT)] = valueDict
     return returnDict
 
@@ -72,27 +62,26 @@ def getCoinMetricsDict(currenciesList, metricsList):
 Retrieves from CoinMetrics a set of metrics (from [0, 1]) of a given set of currencies (type Cryptocurrencies) 
 from a given date range.
 '''
-def getCoinMetricsDateRange(currenciesList, metricsList, startDate, endDate):
-    dataDict = getCoinMetricsDict(currenciesList, metricsList)
+def getCoinMetricsDateRange(metric, startDate, endDate, currenciesList):
+    dataDict = getCoinMetricsDict(currenciesList, [metric])
     
     newDict = {}
     for currency, values in dataDict.items():
         numMetrics = len(values[list(values.keys())[0]])
         
-        metrics = {}
-        for metric in metricsList:
-            metrics[metric] = (min(val[metric] for val in values.values()), max(val[metric] for val in values.values()))
+        minVal = min(val[metric] for val in values.values()) 
+        maxVal = max(val[metric] for val in values.values())
             
         newDict[currency] = {}
         
         for date, metricsDict in values.items():
             if date.date() >= startDate.date() and date.date() <= endDate.date():
-                newDict[currency][date] = {metric:mathutil.map(metricsDict[metric], minVal, maxVal, 0, 1) for metric, (minVal, maxVal) in metrics.items()}
+                newDict[currency][date] = mathutil.map(metricsDict[metric], minVal, maxVal, 0, 1) 
                 
     return newDict
     
 # Plots all data available from CoinMetrics across time for a given currency.
 def plotAllCoinMetricsData(currency, startDate=dateutil.getCurrentDateTime() - datetime.timedelta(days=1000), endDate=dateutil.getCurrentDateTime()):
     for dataKey in list(CoinMetricsData):
-        data = getCoinMetricsDateRange([currency], [dataKey], startDate, endDate)[currency.value]
+        data = getCoinMetricsDateRange(dataKey, startDate, endDate, [currency])[currency.value]
         timeseries.TimeSeries("{}: {}".format(str(currency), str(dataKey)), {dataKey: {date:values[list(values.keys())[0]] for date, values in data.items()}})

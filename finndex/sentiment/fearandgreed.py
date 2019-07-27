@@ -6,7 +6,7 @@ import datetime
 import json
 
 from finndex.graphing import gauge
-from finndex.util import dateutil, mathutil, webutil
+from finndex.util import cryptocurrencies, dateutil, mathutil, webutil
 
 __author__ = "Finn Frankis"
 __copyright__ = "Copyright 2019, Crypticko"
@@ -41,7 +41,7 @@ def getAllFearAndGreed():
 Uses the Fear and Greed API to extract all Fear and Greed values available in a given date range. Returns a dictionary with key as date
 and value the Fear and Greed value on that date.
 '''
-def getFearAndGreedDateRange(startDate, endDate):
+def getFearAndGreedDateRange(startDate, endDate, currenciesList=[cryptocurrencies.Cryptocurrencies.BITCOIN]):
     fearAndGreedVals = getAllFearAndGreed()
     dataDict = {}
 

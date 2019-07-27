@@ -12,12 +12,11 @@ from finndex.aggregate import sliders
 from finndex.fundamental import coinmetrics
 from finndex.graphing import timeseries
 from finndex.sentiment import fearandgreed, trends
-from finndex.util import dateutil, mathutil
+from finndex.util import cryptocurrencies, dateutil, mathutil
 from IPython.display import display
 
 __author__ = "Finn Frankis"
 __copyright__ = "Copyright 2019, Crypticko"
-
 
 '''
 Represents a piece of data with several values over time. 'values' is a dictionary with the date as the key
@@ -46,15 +45,16 @@ Computes and plots a set of daily historical sentiment values given a set of key
 if weights are provided in the 'weights' parameter, presents a static graph using those weights.
 '''
 class HistoricalSentimentManager:
-   def __init__(self, weightedKeywordsList, startDate = dateutil.getCurrentDateTime() - datetime.timedelta(weeks=4), endDate = dateutil.getCurrentDateTime(), weights = None, 
+   def __init__(self, weightedKeywordsList, currenciesList, startDate = dateutil.getCurrentDateTime() - datetime.timedelta(weeks=4), endDate = dateutil.getCurrentDateTime(), weights = None, 
                 unweightedKeywordsList = []):
-      self.dataVals = []
+      self.dataDict = {}
 
       self.startDate = startDate
       self.endDate = endDate
       self.weights=weights
       self.unweightedKeywordsList = unweightedKeywordsList
       self.weightedKeywordsList = weightedKeywordsList
+      self.currenciesList = currenciesList
 
       slidersList = self.computeDataVals()
 
@@ -71,12 +71,20 @@ class HistoricalSentimentManager:
    def computeDataVals(self):
       slidersList = []
       for idx, keyword in enumerate(self.weightedKeywordsList):
-         dataReading = HistoricalDataReading(name=str(keyword), values=keyword.value(startDate=self.startDate, endDate=self.endDate), 
-                                   slider=sliders.Slider(str(keyword), widgets.FloatSlider(min=0.0, max=sliders.MAX_VAL, 
-                                                                                           step=sliders.STEP, 
-                                                                                           value=self.weights[idx] if self.weights != None else 0.0)))
-         self.dataVals += [dataReading]
-         slidersList += [dataReading.slider]
+         slider = sliders.Slider(str(keyword), widgets.FloatSlider(min=0.0, max=sliders.MAX_VAL, 
+                                                                                             step=sliders.STEP, 
+                                                                                             value=self.weights[idx] if self.weights != None else 0.0))
+         valuesDict = keyword.value(startDate=self.startDate, endDate=self.endDate, currenciesList=self.currenciesList)
+         print(valuesDict)
+         for currency in self.currenciesList:
+            dataReading = HistoricalDataReading(name=str(keyword), values=valuesDict[currency], 
+                                    slider=slider)
+            if not currency in self.dataDict:
+               self.dataDict[currency] = [dataReading]
+            else:
+               self.dataDict[currency] += [dataReading]
+         
+         slidersList += [slider]
 
       return slidersList
 
@@ -107,26 +115,30 @@ class HistoricalSentimentManager:
    Computes the weighted historical sentiment with the date as the key and the historical sentiment on that date as the value.
    '''
    def getHistoricalSentiment(self):
-      sentimentByDate = {}
-   
-      for date in dateutil.dateRange(self.startDate.date(), self.endDate.date()):
-         sentimentByDate[date] = []
+      currenciesSentiment = {}
+      for currency in self.currenciesList:
+         sentimentByDate = {}
+      
+         for date in dateutil.dateRange(self.startDate.date(), self.endDate.date()):
+            sentimentByDate[date] = []
 
-         # Populate the sentiment dictionary with date pointing to a list of every corresponding historical sentiment value
-         for historicalReading in self.dataVals:
-            sentimentByDate[date] += [(historicalReading.values[date]
-                                       if date in historicalReading.values
-                                      else -float('inf'), historicalReading.slider.getReading())] # add tuple with value (-infinity if nothing provided) and weight
+            # Populate the sentiment dictionary with date pointing to a list of every corresponding historical sentiment value
+            for historicalReading in self.dataDict[currency]:
+               sentimentByDate[date] += [(historicalReading.values[date]
+                                          if date in historicalReading.values
+                                       else -float('inf'), historicalReading.slider.getReading())] # add tuple with value (-infinity if nothing provided) and weight
 
-         values = HistoricalSentimentManager.removeGaps(sentimentByDate[date])
+            values = HistoricalSentimentManager.removeGaps(sentimentByDate[date])
 
-         sentimentByDate[date] = 0
+            sentimentByDate[date] = 0
 
-         # Find the weighted average of sentiment on a given day
-         for value, weight in values:
-            sentimentByDate[date] += value * weight
+            # Find the weighted average of sentiment on a given day
+            for value, weight in values:
+               sentimentByDate[date] += value * weight
 
-      return sentimentByDate
+         currenciesSentiment[currency] = sentimentByDate
+
+      return currenciesSentiment
 
    '''
    Displays/updates a graph given a dictionary of values 'valueDict' (value type as key and HistoricalDataReading as value).
