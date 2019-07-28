@@ -120,7 +120,7 @@ class HistoricalSentimentManager:
    '''
    def getHistoricalSentiment(self):
       currenciesSentiment = {}
-      for currency in self.currenciesList:
+      for currency in self.dataDict:
          sentimentByDate = {}
       
          for date in dateutil.dateRange(self.startDate.date(), self.endDate.date()):

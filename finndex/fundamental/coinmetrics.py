@@ -83,5 +83,6 @@ def getCoinMetricsDateRange(metric, startDate, endDate, currenciesList):
 # Plots all data available from CoinMetrics across time for a given currency.
 def plotAllCoinMetricsData(currency, startDate=dateutil.getCurrentDateTime() - datetime.timedelta(days=1000), endDate=dateutil.getCurrentDateTime()):
     for dataKey in list(CoinMetricsData):
-        data = getCoinMetricsDateRange(dataKey, startDate, endDate, [currency])[currency.value]
-        timeseries.TimeSeries("{}: {}".format(str(currency), str(dataKey)), {dataKey: {date:values[list(values.keys())[0]] for date, values in data.items()}})
+        data = getCoinMetricsDateRange(dataKey, startDate, endDate, [currency])
+
+        timeseries.TimeSeries("{}: {}".format(str(currency), str(dataKey)), {dataKey: data})

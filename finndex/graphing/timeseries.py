@@ -25,12 +25,11 @@ dataDateFormat (string) represents the format of all the incoming x-values. grap
 dates will be displayed on the x-axis. 
 '''
 class TimeSeries:
-    def __init__(self, title, data, colors=['tab:red', 'tab:blue', 'tab:green'], dataDateFormat=dateutil.DESIRED_DATE_FORMAT, graphedDateFormat = None, yMin=None, yMax=None, fileName=False):
+    def __init__(self, title, data, colors=['tab:red', 'tab:blue', 'tab:green','tab:purple', 'tab:pink', 'tab:orange'], dataDateFormat=dateutil.DESIRED_DATE_FORMAT, graphedDateFormat = None, yMin=None, yMax=None, fileName=False):
         self.title = title
         self.data = data
         self.dataDateFormat = dataDateFormat
 
-        print(data)
         if graphedDateFormat == None:
             firstDataSet = data[list(data.keys())[0]]
             timeDifference = max(firstDataSet[list(firstDataSet.keys())[0]]) - min(firstDataSet[list(firstDataSet.keys())[0]])
