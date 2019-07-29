@@ -12,12 +12,17 @@ STEP = 0.01
 
 '''
 Wraps Jupyter's 'Slider' widget (stored as obj) with a slider description and a boolean keeping track of whether the slider was edited manually or programatically.
+
 '''
 class Slider:
-   def __init__(self, description, obj):
-      self.obj = obj
+   def __init__(self, description, initVal, static=False):
+      self.obj = widgets.FloatSlider(min=0.0, max=MAX_VAL, step=STEP, 
+                                     value=initVal)
+                                     
       self.editedManually = False
       self.description = description
+
+      self.static = static
       
    def getReading(self):
       return self.obj.value

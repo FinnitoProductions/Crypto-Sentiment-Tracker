@@ -23,8 +23,8 @@ Represents a piece of data with several values over time. 'values' is a dictiona
 and the corresponding value on that date as the value. 'slider' is the slider modifying the weight of this reading.
 '''
 class HistoricalDataReading:
-   def __init__(self, name, values, slider):
-      self.name = name
+   def __init__(self, values, slider):
+      self.name = slider.description
       self.values = values
       self.slider = slider
 
@@ -70,9 +70,9 @@ class HistoricalSentimentManager:
       slidersList = []
       dataDict = {}
       for idx, keyword in enumerate(weightedKeywordsList):
-         slider = sliders.Slider(str(keyword), widgets.FloatSlider(min=0.0, max=sliders.MAX_VAL, 
-                                                                                             step=sliders.STEP, 
-                                                                                             value=weights[idx] if weights != None else 0.0))
+         weightsSpecified = weights is not None
+         slider = sliders.Slider(description = str(keyword), initVal = weights[idx] if weightsSpecified else 0.0, 
+                                 static = weightsSpecified)
          valuesDict = keyword.value(startDate=startDate, endDate=endDate, currenciesList=currenciesList)
 
          for currency in currenciesList:

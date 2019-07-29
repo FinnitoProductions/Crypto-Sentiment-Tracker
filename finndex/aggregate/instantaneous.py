@@ -20,8 +20,8 @@ __copyright__ = "Copyright 2019, Crypticko"
 
 # Represents a static named data reading represented by a single gauge and weighted by a slider.
 class DataReading:
-   def __init__(self, name, gauge, slider):
-      self.name = name
+   def __init__(self, gauge, slider):
+      self.name = slider.description
       self.gauge = gauge
       self.slider = slider
 
@@ -43,10 +43,9 @@ class InstantaneousSentimentManager:
       slidersList = []
 
       for idx, keyword in enumerate(keywordsList):
-         dataReading = DataReading(name=str(keyword), gauge=keyword.value(date=date, display=displayIntermediates), 
-                                   slider=sliders.Slider(str(keyword), widgets.FloatSlider(min=0.0, max=sliders.MAX_VAL, 
-                                                                                           step=sliders.STEP, 
-                                                                                           value=weights[idx] if weights != None else 0.0)))
+         weightsSpecified = weights is not None
+         dataReading = DataReading(gauge=keyword.value(date=date, display=displayIntermediates), 
+                                   slider=sliders.Slider(description=str(keyword), initVal=weights[idx] if weightsSpecified else 0.0, static=weightsSpecified))
          self.dataVals += [dataReading]
          slidersList += [dataReading.slider]
 
