@@ -117,7 +117,8 @@ class HistoricalSentimentManager:
             slidersList += [slider]
       
       #dates = [date for date in [values[annotation][dataType] for dataType in [values[annotation] for annotation in values]]]
-      dates = [datetime.datetime.now() - datetime.timedelta(days=60), datetime.datetime.now()] # TODO: FIX
+      dates = [date for annotation in values for dataType in values[annotation] for date in values[annotation][dataType]]
+      #dates = [datetime.datetime.now() - datetime.timedelta(days=60), datetime.datetime.now()] # TODO: FIX
       return cls(dataDict, slidersList, min(dates), max(dates))
 
    '''
@@ -151,7 +152,8 @@ class HistoricalSentimentManager:
       for currency in self.dataDict:
          sentimentByDate = {}
       
-         for date in dateutil.dateRange(self.startDate.date(), self.endDate.date()):
+         for date in dateutil.dateRange(self.startDate.date() if isinstance(self.startDate, datetime.datetime) else self.startDate, 
+                                        self.endDate.date() if isinstance(self.endDate, datetime.datetime) else self.endDate):
             sentimentByDate[date] = []
 
             # Populate the sentiment dictionary with date pointing to a list of every corresponding historical sentiment value
