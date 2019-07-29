@@ -23,10 +23,10 @@ Represents a piece of data with several values over time. 'values' is a dictiona
 and the corresponding value on that date as the value. 'slider' is the slider modifying the weight of this reading.
 '''
 class HistoricalDataReading:
-    def __init__(self, name, values, slider):
-        self.name = name
-        self.values = values
-        self.slider = slider
+   def __init__(self, name, values, slider):
+      self.name = name
+      self.values = values
+      self.slider = slider
 
 '''
 Represents all possible values that can be plotted historically. Each value corresponds to a standard data retrieval function.
@@ -45,52 +45,52 @@ Computes and plots a set of daily historical sentiment values given a set of key
 if weights are provided in the 'weights' parameter, presents a static graph using those weights.
 '''
 class HistoricalSentimentManager:
-   def __init__(self, weightedKeywordsList, currenciesList, startDate = dateutil.getCurrentDateTime() - datetime.timedelta(weeks=4), endDate = dateutil.getCurrentDateTime(), weights = None, 
-                unweightedKeywordsList = []):
-      self.dataDict = {}
+   def __init__(self, dataDict, slidersList, startDate, endDate):
+      '''
+      {
+         'BTC': [HistoricalDataReading, HistoricalDataReading, ...],
+         'LTC': [HistoricalDataReading, HistoricalDataReading, ...]
+      }
+      '''
+      self.dataDict = dataDict
+
+      if slidersList is None:
+         self.sliderManager = None
+      else:
+         self.sliderManager = sliders.SliderManager(self.displayGraph, slidersList)
 
       self.startDate = startDate
       self.endDate = endDate
-      self.weights=weights
-      self.unweightedKeywordsList = unweightedKeywordsList
-      self.weightedKeywordsList = weightedKeywordsList
-      self.currenciesList = currenciesList
-
-      slidersList = self.computeDataVals()
-
-      if weights == None:
-         self.sliderManager = sliders.SliderManager(self.displayGraph, slidersList)
-      else:
-         self.sliderManager = None
-
       self.graph = None
 
-   '''
-   Generates a list of sliders for and computes the historical values of all desired keywords.
-   '''
-   def computeDataVals(self):
+   @classmethod
+   def specifyDataTypes(cls, weightedKeywordsList, currenciesList, 
+                        startDate = dateutil.getCurrentDateTime() - datetime.timedelta(weeks=4), 
+                        endDate = dateutil.getCurrentDateTime(), weights = None):
       slidersList = []
-      for idx, keyword in enumerate(self.weightedKeywordsList):
+      dataDict = {}
+      for idx, keyword in enumerate(weightedKeywordsList):
          slider = sliders.Slider(str(keyword), widgets.FloatSlider(min=0.0, max=sliders.MAX_VAL, 
                                                                                              step=sliders.STEP, 
-                                                                                             value=self.weights[idx] if self.weights != None else 0.0))
-         valuesDict = keyword.value(startDate=self.startDate, endDate=self.endDate, currenciesList=self.currenciesList)
+                                                                                             value=weights[idx] if weights != None else 0.0))
+         valuesDict = keyword.value(startDate=startDate, endDate=endDate, currenciesList=currenciesList)
 
-         for currency in self.currenciesList:
+         for currency in currenciesList:
             values = valuesDict[currency]
 
             values = {(date.date() if isinstance(date, datetime.datetime) else date):val for date, val in values.items()}
 
             dataReading = HistoricalDataReading(name=str(keyword), values=values, 
                                     slider=slider)
-            if not currency in self.dataDict:
-               self.dataDict[currency] = [dataReading]
+
+            if not currency in dataDict:
+               dataDict[currency] = [dataReading]
             else:
-               self.dataDict[currency] += [dataReading]
-         
+               dataDict[currency] += [dataReading]
+
          slidersList += [slider]
 
-      return slidersList
+      return cls(dataDict, slidersList, startDate, endDate)
 
    '''
    Removes any missing data from a weighted dataset by distributing the weight of any missing values (represented by negative infinity)
@@ -153,20 +153,7 @@ class HistoricalSentimentManager:
    will remain static when plotted and cannot be removed.
    '''
    def displayGraph(self):
-      data = {'aggregateSentiment': self.getHistoricalSentiment()}
-
-      # Overlay any additional keywords provided
-      for additionalKeyword in self.unweightedKeywordsList:
-         value = additionalKeyword.value(startDate = self.startDate, endDate = self.endDate)
-         if len(self.unweightedKeywordsList) == 1:
-            data[additionalKeyword] = value # If there is only one keyword, the y-axis will be labeled with that keyword
-         else:
-            ADDITIONAL_DATA_KEY = 'Additional Data' # If there are multiple terms, use a more general term
-            if not ADDITIONAL_DATA_KEY in data:
-               data[ADDITIONAL_DATA_KEY] = [value]
-            else:
-               data[ADDITIONAL_DATA_KEY] += [value]
-      
+      data = {'aggregateSentiment': self.getHistoricalSentiment()}      
 
       if self.graph == None:
          self.graph = timeseries.TimeSeries(title = "Aggregate Sentiment", data=data, yMin=0, yMax=1)
