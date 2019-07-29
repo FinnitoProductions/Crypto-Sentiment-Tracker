@@ -45,7 +45,7 @@ class InstantaneousSentimentManager:
       for idx, keyword in enumerate(keywordsList):
          weightsSpecified = weights is not None
          dataReading = DataReading(gauge=keyword.value(date=date, display=displayIntermediates), 
-                                   slider=sliders.Slider(description=str(keyword), initVal=weights[idx] if weightsSpecified else 0.0, static=weightsSpecified))
+                                   slider=sliders.Slider(description=str(keyword), initVal=weights[idx] if weightsSpecified else None, static=weightsSpecified))
          self.dataVals += [dataReading]
          slidersList += [dataReading.slider]
 

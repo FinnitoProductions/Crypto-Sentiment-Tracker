@@ -71,7 +71,7 @@ class HistoricalSentimentManager:
       dataDict = {}
       for idx, keyword in enumerate(weightedKeywordsList):
          weightsSpecified = weights is not None
-         slider = sliders.Slider(description = str(keyword), initVal = weights[idx] if weightsSpecified else 0.0, 
+         slider = sliders.Slider(description = str(keyword), initVal = weights[idx] if weightsSpecified else None, 
                                  static = weightsSpecified)
          valuesDict = keyword.value(startDate=startDate, endDate=endDate, currenciesList=currenciesList)
 
@@ -91,6 +91,34 @@ class HistoricalSentimentManager:
          slidersList += [slider]
 
       return cls(dataDict, slidersList, startDate, endDate)
+
+   @classmethod 
+   def specifyDataVals(cls, values):
+      '''
+      {
+         'annotation': {
+                           'dataType1': {
+                                           date:value
+                                        },
+                           'dataType2': {
+                                           date:value
+                                        }
+                       }
+      }
+      '''
+      dataDict = {}
+
+      slidersList = []
+      for annotation in values:
+         dataDict[annotation] = []
+         for dataType in values[annotation]:
+            slider = sliders.Slider(description=dataType)
+            dataDict[annotation] += [HistoricalDataReading(values=values[annotation][dataType],slider=slider)]
+            slidersList += [slider]
+      
+      #dates = [date for date in [values[annotation][dataType] for dataType in [values[annotation] for annotation in values]]]
+      dates = [datetime.datetime.now() - datetime.timedelta(days=60), datetime.datetime.now()] # TODO: FIX
+      return cls(dataDict, slidersList, min(dates), max(dates))
 
    '''
    Removes any missing data from a weighted dataset by distributing the weight of any missing values (represented by negative infinity)

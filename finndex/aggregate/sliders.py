@@ -15,12 +15,13 @@ Wraps Jupyter's 'Slider' widget (stored as obj) with a slider description and a 
 
 '''
 class Slider:
-   def __init__(self, description, initVal, static=False):
+   def __init__(self, description, initVal=None, static=False):
       self.obj = widgets.FloatSlider(min=0.0, max=MAX_VAL, step=STEP, 
                                      value=initVal)
-                                     
+
       self.editedManually = False
       self.description = description
+      self.initVal = initVal
 
       self.static = static
       
@@ -35,7 +36,8 @@ class Slider:
    sliders will start out with equal values.
    '''
    def initSliderValue(self, initVal):
-      self.setReading(initVal)
+      if self.initVal is None:
+         self.setReading(initVal)
 
 # Manages any number of weight sliders, ensuring that they always add to 1.0 regardless of modification.
 class SliderManager:
@@ -56,7 +58,7 @@ class SliderManager:
 
    # Generates a box widget which displays any number of sliders adjacent to their description.
    def generateDisplayBox(self):
-      leftBoxElements = [widgets.Label(slider.description) for slider in self.slidersList]
+      leftBoxElements = [widgets.Label(str(slider.description)) for slider in self.slidersList]
       rightBoxElements = [slider.obj for slider in self.slidersList]
       return widgets.HBox([widgets.VBox(leftBoxElements), widgets.VBox(rightBoxElements)])
 
