@@ -64,12 +64,12 @@ class HistoricalSentimentManager:
       self.graph = None
 
    @classmethod
-   def specifyDataTypes(cls, weightedKeywordsList, currenciesList, 
+   def specifyDataTypes(cls, keywordsList, currenciesList, 
                         startDate = dateutil.getCurrentDateTime() - datetime.timedelta(weeks=4), 
                         endDate = dateutil.getCurrentDateTime(), weights = None):
       slidersList = []
       dataDict = {}
-      for idx, keyword in enumerate(weightedKeywordsList):
+      for idx, keyword in enumerate(keywordsList):
          weightsSpecified = weights is not None
          slider = sliders.Slider(description = str(keyword), initVal = weights[idx] if weightsSpecified else None, 
                                  static = weightsSpecified)
@@ -121,6 +121,7 @@ class HistoricalSentimentManager:
       #dates = [datetime.datetime.now() - datetime.timedelta(days=60), datetime.datetime.now()] # TODO: FIX
       return cls(dataDict, slidersList, min(dates), max(dates))
 
+
    '''
    Removes any missing data from a weighted dataset by distributing the weight of any missing values (represented by negative infinity)
    to all subsequent values. Does not modify the passed-in list; returns a modified shallow copy.
@@ -147,7 +148,7 @@ class HistoricalSentimentManager:
    '''
    Computes the weighted historical sentiment with the date as the key and the historical sentiment on that date as the value.
    '''
-   def getHistoricalSentiment(self):
+   def getHistoricalSentiment(self): 
       currenciesSentiment = {}
       for currency in self.dataDict:
          sentimentByDate = {}
@@ -195,3 +196,16 @@ class HistoricalSentimentManager:
          self.graph.plotTimeSeries() # updates the graph
 
       return self.graph
+
+class IndexManager:
+   def __init__(self, keywordsList, currenciesList, 
+                        startDate = dateutil.getCurrentDateTime() - datetime.timedelta(weeks=4), 
+                        endDate = dateutil.getCurrentDateTime(), weights = None):
+      self.dataManager = HistoricalSentimentManager.specifyDataTypes(keywordsList, currenciesList, startDate, endDate, weights)
+      self.indexManager = HistoricalSentimentManager.specifyDataVals({'coins':self.dataManager.getHistoricalSentiment()})
+
+   def displayIntermediates(self):
+      self.dataManager.displayGraph()
+
+   def displayIndex(self):
+      self.indexManager.displayGraph()
