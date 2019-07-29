@@ -80,7 +80,7 @@ class HistoricalSentimentManager:
 
             values = {(date.date() if isinstance(date, datetime.datetime) else date):val for date, val in values.items()}
 
-            dataReading = HistoricalDataReading(name=str(keyword), values=values, 
+            dataReading = HistoricalDataReading(values=values, 
                                     slider=slider)
 
             if not currency in dataDict:
