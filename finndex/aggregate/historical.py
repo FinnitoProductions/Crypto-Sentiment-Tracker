@@ -125,7 +125,11 @@ class HistoricalSentimentManager:
       return dataDict, slidersList, min(dates), max(dates)
 
    def updateDataVals(self, values):
-      self.dataDict, self.slidersList, self.startDate, self.endDate = HistoricalSentimentManager.convertToDictFormat(values)
+      dataDict, slidersList, self.startDate, self.endDate = HistoricalSentimentManager.convertToDictFormat(values)
+      for annotation in dataDict:
+         for dataReading in dataDict[annotation]:
+            correspondingDataReading = [val for val in self.dataDict[annotation] if val.slider.description == dataReading.slider.description][0]
+            correspondingDataReading.values = dataReading.values
 
 
    '''
