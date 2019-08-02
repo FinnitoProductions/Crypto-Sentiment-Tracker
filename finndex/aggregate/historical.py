@@ -106,6 +106,10 @@ class HistoricalSentimentManager:
                        }
       }
       '''
+      return cls(*HistoricalSentimentManager.convertToDictFormat(values)) # expand tuple into arguments
+   
+   @staticmethod
+   def convertToDictFormat(values):
       dataDict = {}
 
       slidersList = []
@@ -116,10 +120,12 @@ class HistoricalSentimentManager:
             dataDict[annotation] += [HistoricalDataReading(values=values[annotation][dataType],slider=slider)]
             slidersList += [slider]
       
-      #dates = [date for date in [values[annotation][dataType] for dataType in [values[annotation] for annotation in values]]]
       dates = [date for annotation in values for dataType in values[annotation] for date in values[annotation][dataType]]
-      #dates = [datetime.datetime.now() - datetime.timedelta(days=60), datetime.datetime.now()] # TODO: FIX
-      return cls(dataDict, slidersList, min(dates), max(dates))
+
+      return dataDict, slidersList, min(dates), max(dates)
+
+   def updateDataVals(self, values):
+      self.dataDict, self.slidersList, self.startDate, self.endDate = HistoricalSentimentManager.convertToDictFormat(values)
 
 
    '''
@@ -203,9 +209,16 @@ class IndexManager:
                         endDate = dateutil.getCurrentDateTime(), weights = None):
       self.dataManager = HistoricalSentimentManager.specifyDataTypes(keywordsList, currenciesList, startDate, endDate, weights)
       self.indexManager = HistoricalSentimentManager.specifyDataVals({'coins':self.dataManager.getHistoricalSentiment()})
+      self.button = widgets.Button(description='Update Weights')
+      self.button.on_click(self.updateIndexGraph)
+
+   def updateIndexGraph(self, change):
+      self.indexManager.updateDataVals({'coins':self.dataManager.getHistoricalSentiment()})
+      self.indexManager.displayGraph()
 
    def displayIntermediates(self):
       self.dataManager.displayGraph()
 
    def displayIndex(self):
       self.indexManager.displayGraph()
+      display(self.button)
