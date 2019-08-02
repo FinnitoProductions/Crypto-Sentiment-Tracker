@@ -1,10 +1,12 @@
 from setuptools import setup
 
+VERSION = '0.3.0'
+
 setup(name='finndex',
-      version='0.2.1',
+      version=VERSION,
       description='A useful tool for crypto analysts providing several metrics on various cryptocurrencies.',
       url='https://github.com/FinnitoProductions/Crypto-Sentiment-Tracker',
-      download_url='https://github.com/FinnitoProductions/finndex/archive/v0.2.1-alpha.tar.gz',
+      download_url='https://github.com/FinnitoProductions/finndex/archive/v{}-alpha.tar.gz'.format(VERSION),
       author='Finn Frankis',
       author_email='finn@teachmy.com',
       license='MIT',
