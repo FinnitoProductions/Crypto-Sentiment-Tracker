@@ -25,12 +25,21 @@ class CoinMetricsData(Enum):
     PRICE_USD = "PriceUSD"
     TRANSACTION_CNT = "TxCnt"
     DAILY_ADDRESSES = "AdrActCnt"
-    
-def get_coinmetrics_data(metrics_list, currencies_list):
+
+def normalize_col(col):
+   '''
+   ' Linearly normalizes a column within a pandas DataFrame by dividing each entry by the maximum value in the column.
+   ' Returns the resultant column.
+   ' 
+   ' col (Series): the column of a given pandas data frame 
+   '''
+   return col / col.loc[col.idxmax()]
+   
+def get_coinmetrics_date_range(metrics_list, start_date, end_date, currencies_list):
    '''
    ' Retrieves a multi-layered data frame containing a list of metrics corresponding to a list of cryptocurrencies.
    ' The outer columns of the frame represent the cryptocurrencies, and the inner columns represent the retrieved metrics.
-   ' TODO: add start date and end date
+   ' 
    ' metrics_list (list<CoinMetricsData>): the list of metrics to be retrieved
    ' currencies_list (list<Cryptocurrencies>): the list of cryptocurrencies to be retrieved
    '''
@@ -42,7 +51,6 @@ def get_coinmetrics_data(metrics_list, currencies_list):
      for keyword in metrics_list:
          desired_metrics += keyword.value + ","
      desired_metrics = desired_metrics[:-1] # remove final comma
-     print(desired_metrics)
       
      page_content = json.loads(webutil.getPageContent(desired_metrics))['metricData']
      metrics_list_retrieved = page_content['metrics']
@@ -54,12 +62,18 @@ def get_coinmetrics_data(metrics_list, currencies_list):
      metrics_frame = metrics_frame.rename({i:metric for (i, metric) in enumerate(metrics_list_retrieved)}, axis=1)
      metrics_frame = metrics_frame.rename({'time':'date'}, axis=1)
      metrics_frame.index = pd.to_datetime(metrics_frame['date'])
+     metrics_frame.index = metrics_frame.index.tz_localize(None)
      metrics_frame.index = metrics_frame.index.floor('d')
    
      for metric in metrics_list_retrieved:
+        metrics_frame[metric] = metrics_frame.apply(lambda row: float(row[metric]) if row[metric] != None else None, axis=1)
         return_frame[currency, metric] = metrics_frame[metric]
-   
-   return return_frame.fillna(0)
+
+     # fill in missing entries, filter by date
+     metrics_frame = return_frame.fillna(0).loc[(return_frame.index >= start_date) & (return_frame.index <= end_date)]
+     # linearly normalize data between 0-1 based on maximum in date-filtered frame
+     metrics_frame = metrics_frame.apply(normalize_col)
+   return metrics_frame
    
 '''
 Retrieves a dictionary containing the CoinMetrics data across all time for a given set of statistics for a given
