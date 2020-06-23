@@ -21,6 +21,8 @@ STANFORD_NLP_PORT = 9002
 MIN_SENTIMENT = 0
 MAX_SENTIMENT = 4
 
+DESIRED_ARTICLES = 10
+
 # Starts the Stanford NLP server with a given timeout and port.
 def startServer(timeout, port):
    os.popen('cd {}; java -mx5g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -timeout {} -port {} &>/dev/null'.format(
@@ -71,14 +73,14 @@ def get_nlp_date_range(start_date, end_date, currencies_list):
    currency_frame = pd.DataFrame()
 
    for currency in currencies_list:
-      articles = newsapi.get_everything(q=currency.value,
+      articles = newsapi.get_everything(q=currency.value.name,
                                          sources='cnn,business-insider',
                                          domains='coindesk.com',
                                          from_param=start_date.strftime("%Y-%m-%d"),
                                          to=end_date.strftime("%Y-%m-%d"),
                                          language='en',
                                          sort_by='popularity',
-                                         page_size = 3)['articles']
+                                         page_size = DESIRED_ARTICLES)['articles']
       
       article_content = []
       for article in articles:

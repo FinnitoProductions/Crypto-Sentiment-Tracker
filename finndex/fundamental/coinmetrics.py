@@ -21,7 +21,7 @@ COIN_METRICS_TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 # Represents an enum containing several possible keywords which can be used with the CoinMetrics API.
 class CoinMetricsData(Enum):
     BLOCK_COUNT = "BlkCnt"
-    MARKET_CAP = "CapRealUSD"
+    MARKET_CAP = "CapMrktCurUSD"
     PRICE_USD = "PriceUSD"
     TRANSACTION_CNT = "TxCnt"
     DAILY_ADDRESSES = "AdrActCnt"
@@ -35,19 +35,21 @@ def normalize_col(col):
    '''
    return col / col.loc[col.idxmax()]
    
-def get_coinmetrics_date_range(metrics_list, start_date, end_date, currencies_list):
+def get_coinmetrics_dates(metrics_list, start_date, end_date, currencies_list):
    '''
    ' Retrieves a multi-layered data frame containing a list of metrics corresponding to a list of cryptocurrencies.
    ' The outer columns of the frame represent the cryptocurrencies, and the inner columns represent the retrieved metrics.
    ' 
    ' metrics_list (list<CoinMetricsData>): the list of metrics to be retrieved
+   ' start_date (datetime) - the start date, with month, day, and year provided
+   ' end_date (datetime) - the end date, with month, day, and year provided
    ' currencies_list (list<Cryptocurrencies>): the list of cryptocurrencies to be retrieved
    '''
    col_index = pd.MultiIndex.from_product([currencies_list, [metric.value for metric in metrics_list]])
    return_frame = pd.DataFrame(columns = col_index)
    
    for currency in currencies_list:
-     desired_metrics = COIN_METRICS_API_PREFIX + NETWORK_METRIC_SUFFIX.format(currency.value.lower())
+     desired_metrics = COIN_METRICS_API_PREFIX + NETWORK_METRIC_SUFFIX.format(currency.value.ticker.lower())
      for keyword in metrics_list:
          desired_metrics += keyword.value + ","
      desired_metrics = desired_metrics[:-1] # remove final comma

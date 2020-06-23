@@ -42,7 +42,7 @@ def get_trends_dates(start_date, end_date, currencies_list):
     
     trends_data_frame = pd.DataFrame()
     for currency in currencies_list:
-        trend = trends.get_historical_interest([currency.value], 
+        trend = trends.get_historical_interest([currency.value.name], 
                                          year_start=start_date.year, month_start=start_date.month, 
                                          day_start=start_date.day, hour_start=start_date.hour, 
                                          year_end=end_date.year, month_end=end_date.month, 
