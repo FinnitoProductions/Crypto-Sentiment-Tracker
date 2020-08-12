@@ -15,6 +15,8 @@ from finndex.sentiment import fearandgreed, trends
 from finndex.util import cryptocurrencies, dateutil, mathutil
 from IPython.display import display
 
+from scipy.stats import pearsonr
+
 __author__ = "Finn Frankis"
 __copyright__ = "Copyright 2019, Crypticko"
 
@@ -56,24 +58,38 @@ class HistoricalSentimentManager:
          self.weights = weights
       else:
          self.weights = [1.0 / len(keywords_list) for keyword in keywords_list] # equal weighting for all values
+      
+      self.historical_sentiment = None
 
    '''
    Computes the weighted historical sentiment with the date as the key and the historical sentiment on that date as the value.
    '''
    def get_historical_sentiment(self): 
-      frames = [metric.value(self.start_date, self.end_date, self.currencies_list) for metric in self.keywords_list]
-      combined = pd.concat(frames, axis=1)
-      
-      return_frame = pd.DataFrame()
-      for cryptocurrency in combined.columns.levels[0]:
-         interp = combined[cryptocurrency].interpolate(limit_direction='backward')
-         weighted = interp.apply(lambda row: np.average(row, weights=self.weights), axis=1)
-         return_frame[cryptocurrency] = weighted
+      return_frame = self.historical_sentiment
+
+      if return_frame is None:
+         frames = [metric.value(self.start_date, self.end_date, self.currencies_list) for metric in self.keywords_list]
+         combined = pd.concat(frames, axis=1)
+         
+         return_frame = pd.DataFrame()
+         for cryptocurrency in combined.columns.levels[0]:
+            interp = combined[cryptocurrency].interpolate(limit_direction='backward')
+            weighted = interp.apply(lambda row: np.average(row, weights=self.weights), axis=1)
+            return_frame[cryptocurrency] = weighted
+
+      self.historical_sentiment = return_frame
 
       return return_frame
 
    def get_prices(self):
       return HistoricalMetricType.PRICE_USD.value(self.start_date, self.end_date, self.currencies_list, normalize_all_time=False)
+
+   def get_price_correlation(self):
+      historical = self.get_historical_sentiment()
+      prices = self.get_prices()
+
+      return {(currency, pearsonr(historical[currency].values[1:], prices[currency]['PriceUSD'].values)[0]) for currency in self.currencies_list}
+
 
    def get_index_sentiment(self, weights=None):
       if weights == None:
