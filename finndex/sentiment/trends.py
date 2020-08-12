@@ -1,7 +1,6 @@
 import datetime
 
 import numpy
-from finndex.graphing import gauge
 from finndex.util import cryptocurrencies, dateutil, mathutil
 from pytrends.request import TrendReq
 import pandas as pd

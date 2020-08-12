@@ -6,7 +6,6 @@ import datetime
 import json
 from enum import Enum
 
-from finndex.graphing import timeseries
 from finndex.util import cryptocurrencies, dateutil, mathutil, webutil
 import pandas as pd
 
@@ -33,9 +32,9 @@ def normalize_col(col):
    ' 
    ' col (Series): the column of a given pandas data frame 
    '''
-   return col / col.loc[col.idxmax()]
+   return col / (col.loc[col.idxmax()])
    
-def get_coinmetrics_dates(metrics_list, start_date, end_date, currencies_list):
+def get_coinmetrics_dates(metrics_list, start_date, end_date, currencies_list, normalize_all_time = True):
    '''
    ' Retrieves a multi-layered data frame containing a list of metrics corresponding to a list of cryptocurrencies.
    ' The outer columns of the frame represent the cryptocurrencies, and the inner columns represent the retrieved metrics.
@@ -71,11 +70,21 @@ def get_coinmetrics_dates(metrics_list, start_date, end_date, currencies_list):
         metrics_frame[metric] = metrics_frame.apply(lambda row: float(row[metric]) if row[metric] != None else None, axis=1)
         return_frame[currency, metric] = metrics_frame[metric]
 
-     # fill in missing entries, filter by date
-     metrics_frame = return_frame.fillna(0).loc[(return_frame.index >= start_date) & (return_frame.index <= end_date)]
-     # linearly normalize data between 0-1 based on maximum in date-filtered frame
-     metrics_frame = metrics_frame.apply(normalize_col)
-   return metrics_frame
+   return_frame = return_frame.astype('float')
+
+   # linearly normalize data between 0-1 based on maximum in non-date-filtered frame
+   if normalize_all_time:
+      return_frame = return_frame.apply(normalize_col)
+
+   # fill in missing entries, filter by date
+   return_frame = return_frame.interpolate().loc[(return_frame.index >= start_date) & (return_frame.index <= end_date)]
+
+   # linearly normalize data between 0-1 based on maximum in date-filtered frame
+   if not normalize_all_time:
+      return_frame = return_frame.apply(normalize_col)
+
+   return return_frame
+
    
 '''
 Retrieves a dictionary containing the CoinMetrics data across all time for a given set of statistics for a given
@@ -102,7 +111,6 @@ def getCoinMetricsDict(currenciesList, metricsList):
         loadedPageData = json.loads(webutil.getPageContent(desiredMetrics))['metricData']
         metricsListRetrieved = loadedPageData['metrics']
         dataSet = pd.DataFrame(loadedPageData['series'])
-        print(pd.concat([dataSet.drop('values',axis=1), dataSet['values'].apply(pd.Series)],axis=1))
         
         for dataDict in dataSet:
             valueDict = {CoinMetricsData(metricsListRetrieved[idx]):float(value) 

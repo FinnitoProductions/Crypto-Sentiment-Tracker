@@ -8,12 +8,11 @@ import os
 import numpy
 from pycorenlp import StanfordCoreNLP
 
-from finndex.graphing import gauge
 
 __author__ = "Finn Frankis"
 __copyright__ = "Copyright 2019, Crypticko"
 
-STANFORD_NLP_LOCATION = '~/stanford-corenlp-4.0.0' # the location of the Stanford NLP library on my computer 
+STANFORD_NLP_LOCATION = '~/stanford-corenlp-4.1.0' # the location of the Stanford NLP library on my computer 
                                                               # (download at https://stanfordnlp.github.io/CoreNLP)
 STANFORD_NLP_TIMEOUT = 100000 # the time after which a given NLP request will be killed if not yet complete
 STANFORD_NLP_PORT = 9002

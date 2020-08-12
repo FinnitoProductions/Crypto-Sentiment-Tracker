@@ -6,7 +6,6 @@ import datetime
 import json
 import pandas as pd
 
-from finndex.graphing import gauge
 from finndex.util import cryptocurrencies, dateutil, mathutil, webutil
 
 __author__ = "Finn Frankis"
