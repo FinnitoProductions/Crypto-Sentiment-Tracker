@@ -1,6 +1,6 @@
 from setuptools import setup
 
-VERSION = '0.3.0'
+VERSION = '0.4.0'
 
 setup(name='finndex',
       version=VERSION,
@@ -18,8 +18,10 @@ setup(name='finndex',
                         'matplotlib',
                         'numpy',
                         'pandas',
+                        'plotly',
                         'pycorenlp',
                         'pytrends',
                         'requests',
+                        'scipy',
                         'stanfordnlp'],
       zip_safe=False)

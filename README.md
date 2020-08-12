@@ -1,13 +1,25 @@
 # finndex
-## Setup
+## Setup -- Display Purposes
+### Cloning the Repository
+In the command line (with git installed), execute
+```shell
+git clone https://github.com/FinnitoProductions/finndex.git
+```
 ### Library Installation
 Install the the latest version of `finndex` using [pip](https://pip.pypa.io/en/stable/installing/):
 ```shell
-pip install finndex
+pip3 install finndex
 ```
+All necessary dependencies will be installed in parallel.
 ### Stanford NLP
-To use the sentiment analysis tools included in the library, you must have Stanford's Natural Language Processing library downloaded. Download the `.zip` archive at [https://stanfordnlp.github.io/CoreNLP](https://stanfordnlp.github.io/CoreNLP) and place the extracted folder in your home directory.
-## Testing 
+To use the sentiment analysis tools included in the library, you must have Stanford's Natural Language Processing library downloaded and stored in the correct location. Download the `.zip` archive at [https://stanfordnlp.github.io/CoreNLP](https://stanfordnlp.github.io/CoreNLP) and place the extracted folder in your home directory. Java must be installed for the StanfordNLP library to correctly execute.
+### Showcasing Key Features
+To showcase the key features of the `finndex` library, activate the Jupyter notebook by executing the following command in your terminal:
+```shell
+jupyter notebook
+```
+The execution of this command will open the Jupyter web interface in your default browser. Navigate to outermost `finndex` directory in the web interface and open the contained notebook `sentiment-analysis-ipynb`. Ensure the notebook environment is set to the same environment where you installed the library.
+## Setup/Testing -- Development Purposes
 ### Virtual Environment
 Once you have cloned the repository, create a virtual environment from which all the notebook code will be executed. This will ensure that all of the installed libraries used are of the correct version.
 
