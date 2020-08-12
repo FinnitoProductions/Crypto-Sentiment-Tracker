@@ -16,13 +16,13 @@ Within the cloned repository's directory, execute the following commands in your
 cd tests # navigate to the 'tests' directory
 python3 -m venv cryptickoenv
 source cryptickoenv/bin/activate # activates the Python virtual environment
-pip install ipykernel
-ipython kernel install --user --name=cryptickoenv
+pip3 install ipykernel
+ipython3 kernel install --user --name=cryptickoenv
 ```
 ### Installing Libraries
 Install all necessary libraries (as dictated in `requirements.txt`) by executing the following command within the `tests` directory to which you navigated in the previous step.
 ```shell
-pip install -r requirements.txt
+pip3 install -r ../requirements.txt
 ```
 ### Running the Notebook
 To activate the Jupyter notebook, execute the following command &mdash; Anaconda and Jupyter must be installed.
