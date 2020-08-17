@@ -77,7 +77,7 @@ def get_coinmetrics_dates(metrics_list, start_date, end_date, currencies_list, n
       return_frame = return_frame.apply(normalize_col)
 
    # fill in missing entries, filter by date
-   return_frame = return_frame.interpolate().loc[(return_frame.index >= start_date) & (return_frame.index <= end_date)]
+   return_frame = return_frame.interpolate().loc[(return_frame.index >= start_date) & (return_frame.index < end_date)]
 
    # linearly normalize data between 0-1 based on maximum in date-filtered frame
    if not normalize_all_time:

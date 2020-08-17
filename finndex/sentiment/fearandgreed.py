@@ -69,7 +69,7 @@ def get_fg_dates(start_date, end_date, currencies_list=[cryptocurrencies.Cryptoc
     '''
     fg_data_frame = get_all_fg()
     fg_date_filtered = fg_data_frame.loc[(fg_data_frame.index >= start_date) & 
-                                     (fg_data_frame.index <= end_date)].copy() 
+                                     (fg_data_frame.index < end_date)].copy() 
     
     for currency in currencies_list:
         fg_date_filtered[currency.value] = fg_date_filtered["value"]
@@ -77,29 +77,3 @@ def get_fg_dates(start_date, end_date, currencies_list=[cryptocurrencies.Cryptoc
     fg_date_filtered.columns = pd.MultiIndex.from_product([currencies_list, ["FearGreed"]])
 
     return fg_date_filtered
-
-'''
-Uses the Fear and Greed API to extract all Fear and Greed values available in a given date range. Returns a dictionary with key as date
-and value the Fear and Greed value on that date.
-'''
-def getFearAndGreedDateRange(startDate, endDate, currenciesList=[cryptocurrencies.Cryptocurrencies.BITCOIN]):
-    fearAndGreedVals = getAllFearAndGreed()
-    dataDict = {}
-
-    for date, data in fearAndGreedVals.items():
-        timestampDate = datetime.datetime.strptime(date, '%Y-%m-%d')
-
-        if timestampDate.date() >= startDate.date() and timestampDate.date() <= endDate.date(): # only consider year, month, and day
-            dataDict[timestampDate.date()] = data
-        
-    return dataDict
-
-# Displays a given Fear and Greed value (0-100) in a convenient gauge format.
-def displayFearAndGreedNum(val, display=True):
-    return gauge.Gauge(labels=['Extreme Fear','Fear','Greed','Extreme Greed'], 
-      colors=['#c80000','#c84b00','#64a000', '#00c800'], currentVal=val, minVal = 0,
-                 maxVal = 1, title='Fear and Greed', displayGauge=display)
-
-# Displays the Fear and Greed value from a given date in a convenient gauge format.
-def displayFearAndGreedDate(date=dateutil.getCurrentDateTime(), display=True):
-    return displayFearAndGreedNum(getFearAndGreed(date), display)

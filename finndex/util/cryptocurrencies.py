@@ -33,6 +33,9 @@ class Stock:
         
         return self.ticker == other.ticker and self.name == other.name
 
+    def __hash__(self):
+        return hash((self.ticker, self.name))
+
 
 class Cryptocurrencies(Enum):
     '''

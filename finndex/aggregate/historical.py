@@ -73,7 +73,7 @@ class HistoricalSentimentManager:
          
          return_frame = pd.DataFrame()
          for cryptocurrency in combined.columns.levels[0]:
-            interp = combined[cryptocurrency].interpolate(limit_direction='backward')
+            interp = combined[cryptocurrency].interpolate().interpolate(limit_direction='backward')
             weighted = interp.apply(lambda row: np.average(row, weights=self.weights), axis=1)
             return_frame[cryptocurrency] = weighted
 
