@@ -1,7 +1,21 @@
 from enum import Enum
 
 class Stock:
-    def __init__(self, ticker, name):
+    TICKER_DICTIONARY = 
+    {
+        'BTC': 'Bitcoin',
+        'ETH': 'Ethereum',
+        'BCH': 'Bitcoin Cash',
+        'XRP': 'Ripple',
+        'LTC': 'Litecoin',
+        'DOGE': 'Dogecoin',
+        'XTZ': 'Tezos',
+        'KNC': 'Kyber Network',
+        'LINK': 'Chainlink',
+        'BAT': 'Basic Attention Token'
+    }
+
+    def __init__(self, ticker, name = None):
         ''' 
         ' Creates a new stock object given ticker symbol and long-form name.
         ' 
@@ -9,19 +23,22 @@ class Stock:
         ' name (str): the long-form name of the stock (ex. Bitcoin)
         '''
         self.ticker = ticker
-        self.name = name
+        if name == None:
+            self.name = TICKER_DICTIONARY[ticker]
+        else:
+            self.name = name
 
 class Cryptocurrencies(Enum):
     '''
     ' Represents an enum of several cryptocurrencies corresponding to their ticker symbols and long-form names.
     '''
-    BITCOIN = Stock("BTC", "Bitcoin")
-    ETHEREUM = Stock("ETH", "Ethereum")
-    BITCOIN_CASH = Stock("BCH", "Bitcoin Cash")
-    RIPPLE = Stock("XRP", "Ripple")
-    LITECOIN = Stock("LTC", "Litecoin")
-    DOGECOIN = Stock("DOGE", "Dogecoin")
-    TEZOS = Stock("XTZ", "Tezos")
-    KYBER_NETWORK = Stock("KNC", "Kyber Network")
-    CHAINLINK = Stock("LINK", "Chainlink")
-    BAT = Stock("BAT", "Basic Attention Token")
+    BITCOIN = Stock("BTC")
+    ETHEREUM = Stock("ETH")
+    BITCOIN_CASH = Stock("BCH")
+    RIPPLE = Stock("XRP")
+    LITECOIN = Stock("LTC")
+    DOGECOIN = Stock("DOGE")
+    TEZOS = Stock("XTZ")
+    KYBER_NETWORK = Stock("KNC")
+    CHAINLINK = Stock("LINK")
+    BAT = Stock("BAT")
