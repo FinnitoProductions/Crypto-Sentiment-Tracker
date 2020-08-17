@@ -1,8 +1,7 @@
 from enum import Enum
 
 class Stock:
-    TICKER_DICTIONARY = 
-    {
+    TICKER_DICTIONARY = {
         'BTC': 'Bitcoin',
         'ETH': 'Ethereum',
         'BCH': 'Bitcoin Cash',
@@ -24,9 +23,16 @@ class Stock:
         '''
         self.ticker = ticker
         if name == None:
-            self.name = TICKER_DICTIONARY[ticker]
+            self.name = Stock.TICKER_DICTIONARY[ticker]
         else:
             self.name = name
+
+    def __eq__(self, other):
+        if not isinstance(other, Stock):
+            return NotImplemented
+        
+        return self.ticker == other.ticker and self.name == other.name
+
 
 class Cryptocurrencies(Enum):
     '''
