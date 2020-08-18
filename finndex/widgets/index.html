@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+
+   <style>
+      h1 {
+         font-family: 'Calibri', sans-serif;
+         text-align: center;
+      }
+      h2 {
+         font-family: 'Calibri', sans-serif;
+      }
+      p {
+         font-family: 'Calibri', sans-serif;
+      }
+   </style>
+</head>
+<body>
+<h1> Crypticko Widget </h1>
+<div id="plot"> </div>
+
+<h2> Factors and Weights </h2>
+<p> Please specify weights within the range between 0 and 1, and ensure that all weights add to 1. </p>
+<p> Trends: <input type="text" class="weightsField" id="trends" value="0.25"> (0.0 - 1.0) </p> 
+<p> Fear and Greed: <input type="text" class="weightsField" id="fear_and_greed" value="0.25"> (0.0 - 1.0) </p> 
+<p> Daily Addresses: <input type="text" class="weightsField" id ="daily_addresses" value="0.25"> (0.0 - 1.0) </p> 
+<p> Transaction Count: <input type="text" class="weightsField" id="transaction_cnt" value="0.25"> (0.0 - 1.0) </p> 
+
+<h2> Coins </h2>
+<select name="coins" id="coins">
+   <option value="btc">Bitcoin</option>
+   <option value="eth">Ethereum</option>
+   <option value="link">Chainlink</option>
+   <option value="knc">Kyber Network</option>
+   <option value="bat">Basic Attention Token</option>
+   <option value="xtz">Tezos</option>
+</select>
+
+<h2> Date Range </h2>
+<p> Start Date: <select id="start_date"> </select></p>
+<p> End Date: <select id="end_date"></select> </p>
+<p> <button type="button" onclick="updateGraph()"> Update Plot </button> </p>
+
+<script src='http://44.233.186.17:9200/widgets/widget.js'></script>
+</body>
+</html>
