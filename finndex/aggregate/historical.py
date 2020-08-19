@@ -82,7 +82,7 @@ class HistoricalSentimentManager:
       return return_frame
 
    def get_prices(self):
-      return HistoricalMetricType.PRICE_USD.value(self.start_date, self.end_date, self.currencies_list, normalize_all_time=False)
+      return HistoricalMetricType.PRICE_USD.value(self.start_date, self.end_date, self.currencies_list, normalize = False)
 
    def get_price_correlation(self):
       historical = self.get_historical_sentiment()

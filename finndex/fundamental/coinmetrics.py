@@ -34,7 +34,7 @@ def normalize_col(col):
    '''
    return col / (col.loc[col.idxmax()])
    
-def get_coinmetrics_dates(metrics_list, start_date, end_date, currencies_list, normalize_all_time = True):
+def get_coinmetrics_dates(metrics_list, start_date, end_date, currencies_list, normalize = True, normalize_all_time = True):
    '''
    ' Retrieves a multi-layered data frame containing a list of metrics corresponding to a list of cryptocurrencies.
    ' The outer columns of the frame represent the cryptocurrencies, and the inner columns represent the retrieved metrics.
@@ -73,14 +73,14 @@ def get_coinmetrics_dates(metrics_list, start_date, end_date, currencies_list, n
    return_frame = return_frame.astype('float')
 
    # linearly normalize data between 0-1 based on maximum in non-date-filtered frame
-   if normalize_all_time:
+   if normalize and normalize_all_time:
       return_frame = return_frame.apply(normalize_col)
 
    # fill in missing entries, filter by date
    return_frame = return_frame.interpolate().loc[(return_frame.index >= start_date) & (return_frame.index < end_date)]
 
    # linearly normalize data between 0-1 based on maximum in date-filtered frame
-   if not normalize_all_time:
+   if normalize and not normalize_all_time:
       return_frame = return_frame.apply(normalize_col)
 
    return return_frame

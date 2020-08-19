@@ -9,6 +9,12 @@ var trace1 = {
     type: 'scatter'
 };
 
+var trace2 = {
+  yaxis: 'y2',
+  mode: 'lines',
+  type: 'scatter'
+};
+
 var sentimentLayout = {
   title: 'Historical Finndex Score',
   xaxis: {
@@ -19,19 +25,13 @@ var sentimentLayout = {
   yaxis: {
       title: 'Finndex Score',
       showline: false
-  }
-};
-
-var priceLayout = {
-  title: 'Historical Price',
-  xaxis: {
-      title: 'Date',
-      showgrid: false,
-      zeroline: false
-    },
-  yaxis: {
-      title: 'Price',
-      showline: false
+  },
+  yaxis2: {
+    title: 'Price',
+    titlefont: {color: 'rgb(148, 103, 189)'},
+    tickfont: {color: 'rgb(148, 103, 189)'},
+    overlaying: 'y',
+    side: 'right'
   }
 };
 
@@ -138,8 +138,8 @@ function updateGraph() {
         y.push(parseFloat(obj[key]));
       }
     
-      trace1.x = x;
-      trace1.y = y;
+      trace2.x = x;
+      trace2.y = y;
       
       requestPrice = retrievePriceData(coin, startDate, endDate);
 
@@ -157,20 +157,15 @@ function updateGraph() {
           trace1.x = x;
           trace1.y = y;
         
-          Plotly.newPlot(graphPrice, [trace1], priceLayout);
+          Plotly.newPlot(graphSentiment, [trace1, trace2], sentimentLayout);
         } 
         else {
             console.log(`Error ${requestPrice.status}: ${requestPrice.statusText}`)
         }
       };
-
-      Plotly.newPlot(graphSentiment, [trace1], sentimentLayout);
     } 
     else {
         console.log(`Error ${requestSentiment.status}: ${requestSentiment.statusText}`)
     }
   };
 }
-
-  
-  
