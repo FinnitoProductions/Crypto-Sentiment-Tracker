@@ -38,6 +38,27 @@ def get_sentiment_score(coin_str):
     sentiment.index = sentiment.index.strftime('%Y-%m-%d')
     return sentiment.to_dict()
 
+@app.route('/api/price/coin=<coin_str>')
+def get_price(coin_str):
+    if 'start_date' in request.args:
+        start_date = pd.to_datetime(request.args['start_date'])
+    else:
+        return "Error: No start date field provided. Please specify a start date."
+
+    if 'end_date' in request.args:
+        end_date = pd.to_datetime(request.args['end_date'])
+    else:
+        return "Error: No end date field provided. Please specify an end date."
+
+    coin = Cryptocurrencies(Stock(coin_str.upper()))
+    sentiment = HistoricalSentimentManager( 
+                                [], 
+                                [coin],
+                                start_date, end_date, []).get_prices()[coin]["PriceUSD"]
+    sentiment.index = sentiment.index.strftime('%Y-%m-%d')
+    return sentiment.to_dict()
+
+
 @app.route('/widgets/<path:path>', methods=['GET'])
 def file_retrieve(path):
     f = open('widgets/' + str(path), "r")
