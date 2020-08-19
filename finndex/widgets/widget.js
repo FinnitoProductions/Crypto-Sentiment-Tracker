@@ -4,19 +4,21 @@ var graphPrice = document.getElementById('plotPrice');
 console.log(graphSentiment)
 console.log(graphPrice)
 
-var trace1 = {
+var traceSentiment = {
     mode: 'lines',
-    type: 'scatter'
+    type: 'scatter',
+    name: 'Finndex Score'
 };
 
-var trace2 = {
+var tracePrice = {
   yaxis: 'y2',
   mode: 'lines',
-  type: 'scatter'
+  type: 'scatter',
+  name: 'Price'
 };
 
 var sentimentLayout = {
-  title: 'Historical Finndex Score',
+  title: 'Historical Finndex Score and Price',
   xaxis: {
       title: 'Date',
       showgrid: false,
@@ -138,8 +140,8 @@ function updateGraph() {
         y.push(parseFloat(obj[key]));
       }
     
-      trace2.x = x;
-      trace2.y = y;
+      traceSentiment.x = x;
+      traceSentiment.y = y;
       
       requestPrice = retrievePriceData(coin, startDate, endDate);
 
@@ -154,10 +156,10 @@ function updateGraph() {
             y.push(parseFloat(obj[key]));
           }
         
-          trace1.x = x;
-          trace1.y = y;
+          tracePrice.x = x;
+          tracePrice.y = y;
         
-          Plotly.newPlot(graphSentiment, [trace1, trace2], sentimentLayout);
+          Plotly.newPlot(graphSentiment, [traceSentiment, tracePrice], sentimentLayout);
         } 
         else {
             console.log(`Error ${requestPrice.status}: ${requestPrice.statusText}`)
