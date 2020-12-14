@@ -1,0 +1,185 @@
+---
+title: "Finndex: Forecasting and Validating Cryptocurrency Price Using Fundamental Blockchain Factors""
+author: "Finn Frankis"
+date: "12/14/20"
+output: 
+  pdf_document:
+    keep_tex: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+install.packages("tidyverse", repos = "http://cran.us.r-project.org")
+install.packages("psych", repos = "http://cran.us.r-project.org")
+install.packages("leaps", repos = "http://cran.us.r-project.org")
+install.packages("car", repos = "http://cran.us.r-project.org")
+
+library(tidyverse)
+library(leaps)
+library(psych)
+library(car)
+```
+
+```{r dataRead}
+# Read in data
+data_agg <- read.csv("aggregate.csv")
+```
+
+```{r univariate}
+# Convert to date format
+data_agg$date <- as.Date(data_agg$date)
+
+# Perform univariate analysis of each of the 5 predictors
+ggplot(data_agg, aes(x=date, y=BlkCnt)) + geom_line() + ggtitle("Daily Block Count over Time")
+ggplot(data_agg, aes(x=date, y=TxCnt)) + geom_line() + ggtitle("Daily Transaction Count over Time")
+ggplot(data_agg, aes(x=date, y=AdrActCnt)) + geom_line() + ggtitle("Daily Addresses over Time")
+ggplot(data_agg, aes(x=date, y=FearGreed)) + geom_line() + ggtitle("Fear and Greed over Time")
+ggplot(data_agg, aes(x=date, y=Trends)) + geom_line() + ggtitle("Google Trends Data over Time")
+```
+
+```{r scatterplot}
+# A fancy scatterplot matrix with pearson method of correlation
+pairs.panels(data_agg[c("PriceUSD","BlkCnt","TxCnt","AdrActCnt","Trends","FearGreed")], 
+             method = "pearson", hist.col = "#00AFBB", # color of histogram
+smooth = FALSE, density = FALSE, ellipses = FALSE)
+```
+
+```{r subsets}
+# Find the best model for each number of predictors (with 5 predictors maximum)
+models <- regsubsets(PriceUSD~BlkCnt+TxCnt+AdrActCnt+Trends+FearGreed, data_agg, nvmax = 5) 
+models.sum <- summary(models)
+# Create four plots within a 2x2 frame to compare the different criteria
+par(mfrow = c(2,2), oma = c(0, 0, 2, 0)) 
+# SSE
+plot(models.sum$rss, xlab = "Number of predictors", ylab = "SSE", type = "l ") 
+# R2
+plot(models.sum$adjr2, xlab = "Number of predictors", ylab = "Adjusted RSq" , type = "l")
+# Mallow's Cp
+plot(models.sum$cp, xlab = "Number of predictors", ylab = "Cp", type = "l") 
+# BIC
+plot(models.sum$bic, xlab = "Number of predictors", ylab = "BIC", type = "l
+") 
+mtext("Best Subsets Parameters Based on Number of Predictors", outer = TRUE, cex = 1.5)
+```
+
+```{r bestPreds}
+# Display the best model (selected predictors are indicated by *) for each number of predictors
+models.sum$outmat
+```
+
+
+```{r intCheck}
+# Divide data into two groups: fear and greed greater than median or not
+data_agg$FGGreaterMedian <- as.character(data_agg$FearGreed > median(data_agg$FearGreed))
+# Plot the relationship between Price and Address Count with or without Fear and Greed
+ggplot(data_agg, aes(x=AdrActCnt, y=PriceUSD, color=FGGreaterMedian)) +
+geom_point() +
+geom_smooth(method=lm, se=FALSE, fullrange=TRUE) +
+labs(title ="Bitcoin Price v.s. Address Count, filtered by Fear and Greed",
+x = "Daily Address Count", y = "Price (USD)")
+
+```
+
+```{r training test}
+# Compute calculated columns
+data_agg <- data_agg %>% mutate(AdrActCnt.FearGreed = AdrActCnt*FearGreed, TxCnt.c = TxCnt - mean(TxCnt), AdrActCnt.c = AdrActCnt - mean(AdrActCnt), FearGreed.c = FearGreed - mean(FearGreed), AdrActCnt.FearGreed.c = AdrActCnt.c * FearGreed.c)
+
+# Remove final fifth of data
+data_agg_filt <- data_agg[1: as.integer(4 * nrow(data_agg)/5),]
+cutoff_index <- as.integer(0.7 * nrow(data_agg_filt))
+
+# Separate into training and test data based on 70-30 ratio
+data_agg_train <- drop_na(data_agg_filt[1:cutoff_index,])
+data_agg_test <- drop_na(data_agg_filt[cutoff_index + 1:nrow(data_agg_filt),])
+
+```
+
+```{r centeredVsUncentered}
+# Compute uncentered regression model
+reg_mult <- lm(PriceUSD~TxCnt+AdrActCnt+FearGreed+AdrActCnt.FearGreed, data_agg_train)
+summary(reg_mult)
+
+# Compute centered regression model
+reg_mult_c <- lm(PriceUSD~TxCnt.c+AdrActCnt.c+FearGreed.c+AdrActCnt.FearGreed.c, data_agg_train)
+summary(reg_mult_c)
+```
+
+```{r vif}
+# Find VIF for uncentered model
+vif(reg_mult)
+# Find VIF for centered model
+vif(reg_mult_c)
+```
+
+```{r assumptions}
+# Calculate residuals and fitted values for centered model
+data_agg_train$resids <- residuals(reg_mult_c)
+data_agg_train$predicted <- predict(reg_mult_c)
+# Plot residuals v.s. fitted values
+ggplot(data_agg_train, aes(x=predicted, y=resids)) + geom_point() + 
+  geom_hline(yintercept=0, color = "blue") +
+labs(title ="Residuals versus Fitted values for Multiple Regression Model", 
+     x = "Fitted values", y = "Residuals")
+# Plot normal distribution
+ggplot(data_agg_train, aes(sample = resids)) + stat_qq() + stat_qq_line() + labs(title ="Normal Probability Plot for Multiple Regression Model", 
+     x = "Theoretical percentiles", y = "Sample percentiles")
+```
+
+
+
+
+```{r msePredict}
+# Create dataframe of predicted entries
+predicted <- predict(reg_mult_c, data_agg_test[,c("TxCnt.c", "AdrActCnt.c", "FearGreed.c", "AdrActCnt.FearGreed.c")])
+data_agg_pred <- data.frame(date = as.Date(data_agg_test$date), PriceUSD=predicted)
+
+# Calculate MSE
+mse <- sqrt(mean((predicted - data_agg_test$PriceUSD)^2))
+mse
+```
+
+```{r predictedVsTest}
+# Associate entries with colors for legend print
+colors <- c("Training Data" = "turquoise", "Test Data" = "green", "Predicted Data" = "orange")
+
+# from https://community.rstudio.com/t/adding-manual-legend-to-ggplot2/41651/2
+data_agg_train$date <- as.Date(data_agg_train$date)
+data_agg_test$date <- as.Date(data_agg_test$date)
+# Plot training, test, predicted data as time series
+ggplot(data_agg_train, aes(x=date)) +
+  geom_line(aes(y=PriceUSD, color= "Training Data"))+
+  geom_line(data=data_agg_test, aes(y=PriceUSD, color="Test Data")) +
+  geom_line(data=data_agg_pred, aes(y=PriceUSD, color = "Predicted Data")) +
+      labs(x = "Date",
+         y = "Price (USD)",
+         color = "Legend") +
+    scale_color_manual(values = colors) + ggtitle("Comparison of Predicted Data with Test Data")
+```
+
+
+
+```{r finndexModified}
+# Predict over full 9-month range
+predicted_full_range <- predict(reg_mult_c, data_agg_filt[,c("TxCnt.c", "AdrActCnt.c", "FearGreed.c", "AdrActCnt.FearGreed.c")])
+
+# Convert full prediction into dataframe
+finndex_modified <- data.frame(date = as.Date(data_agg_filt$date), finndex_m=predicted_full_range)
+
+# Normalize between 0 and 1
+finndex_modified$finndex_m_n <- finndex_modified$finndex_m / max(finndex_modified$finndex_m) 
+```
+
+
+```{r finndexModifiedSLR}
+# Read in classic finndex value
+finndex_classic <- read.csv("finndex_classic.csv")
+
+# Create frame for easy comparison between the two
+comparison_frame <- data.frame(date=finndex_modified$date, finndex_modified = finndex_modified$finndex_m_n, finndex_classic = finndex_classic$finndex_c_n, price=data_agg_filt$PriceUSD)
+
+# Find correlation between price and modified finndex
+cor(comparison_frame$price, comparison_frame$finndex_modified)
+# Find correlation between price and classic finndex
+cor(comparison_frame$price, comparison_frame$finndex_classic)
+```
+

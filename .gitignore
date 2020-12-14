@@ -110,3 +110,18 @@ libtesting/**
 .vscode/
 
 tests/
+
+# LaTex
+*.aux
+*.nav
+*.snm
+*.toc
+*.vrb 
+*.fls
+*.fdb_latex
+*.synctex.gz
+*.eps
+finndexRP3_files/**
+*.out
+*.fdb_latexmk
+.DS_Store

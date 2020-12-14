@@ -1,0 +1,120 @@
+\documentclass[10pt]{beamer}
+
+    \usetheme[progressbar=frametitle]{metropolis}
+    \usepackage{appendixnumberbeamer}
+    
+    \usepackage{booktabs}
+    \usepackage[scale=2]{ccicons}
+    
+    \usepackage{pgfplots}
+    \usepgfplotslibrary{dateplot}
+    
+    \usepackage{xspace}
+    \newcommand{\themename}{\textbf{\textsc{metropolis}}\xspace}
+    \usepackage{verbatim}
+    \usepackage{amsmath}
+    \usepackage{graphicx}
+    \usepackage[export]{adjustbox}
+    
+    \definecolor{pblue}{rgb}{0.13,0.13,1}
+    \definecolor{pgreen}{rgb}{0,0.5,0}
+    \definecolor{pred}{rgb}{0.9,0,0}
+    \definecolor{pgrey}{rgb}{0.46,0.45,0.48}
+    
+    \usepackage{listings}
+    \lstset{language=Java,
+      showspaces=false,
+      showtabs=false,
+      breaklines=true,
+      showstringspaces=false,
+      breakatwhitespace=true,
+      commentstyle=\color{pgreen},
+      keywordstyle=\color{pblue},
+      stringstyle=\color{pred},
+      basicstyle=\ttfamily,
+      moredelim=[il][\textcolor{pgrey}]{$ $},
+      moredelim=[is][\textcolor{pgrey}]{\%\%}{\%\%}
+    }
+    
+    \title{Finndex: Forecasting and Validating Cryptocurrency Price Using Blockchain Statistics}
+    \subtitle{SDS 358: Final Project}
+    \date{\today}
+    \author{Finn Frankis}
+    %\institute{Harker Robotics - Sofware Summer Camp - 2018}
+    \titlegraphic{\hfill\includegraphics[height=1.5cm]{uttexas.eps}}
+    
+    \begin{document}
+    
+    \maketitle
+    
+    \begin{frame}{Table of contents}
+      \setbeamertemplate{section in toc}[sections numbered]
+      \tableofcontents[hideallsubsections]
+    \end{frame}
+    \section{Background}
+
+    \section{Methods}
+    \begin{frame}[fragile]{Predictors}
+        \begin{itemize}
+            \item Open-source data for 9-month window
+            \item Predictor variables
+            \begin{itemize}
+            \item Block Count
+            \item Transaction Count
+            \item Address Count
+            \item Fear and Greed
+            \item Google Trends
+            \end{itemize}
+            \item Response variable: price in USD
+        \end{itemize}
+    \end{frame}
+
+    \begin{frame}[fragile]{Model Selection}
+        \begin{itemize} 
+            \item Best Subsets Technique: minimize $C_p$, BIC, SSE; maximize adjusted $R^2$
+            \item Study theoretical effects between predictors to consider adding interaction terms
+            \item Center predictors based on VIF values to reduce multicollinearity 
+        \end{itemize}
+    \end{frame}
+
+    \begin{frame}[fragile]{Model Validation}
+        \begin{itemize}
+            \item Training-Test Paradigm
+        \begin{enumerate}
+            \item Divide data into 70-30 ratio of training and test data 
+            \item Train model on first 70\% (6 months)
+            \item Predict remaining 3 months, compare to test data and calculate MSE
+        \end{enumerate}
+        \item Compare correlation of ``classic'' \textit{finndex} (normalized weighted average) with price and ``modified'' \textit{finndex} (normalized output of MLR model) with price
+        \end{itemize}
+    \end{frame}
+    \section{Results}
+    \begin{frame}[fragile]{Best Subsets Model}
+        \includegraphics[width=\textwidth]{finndexRP3_files/figure-latex/subsets-1.pdf} \mbox{}
+    \end{frame}
+    \begin{frame}[fragile]{Interaction Check}
+        \includegraphics[width=\textwidth]{finndexRP3_files/figure-latex/intCheck-1.pdf} \mbox{}
+    \end{frame}
+    \begin{frame}[fragile]{Hypothesis Testing}
+        \includegraphics[width=0.5\textwidth]{finndexRP3_files/figure-latex/assumptions-1.pdf}% 
+        \includegraphics[width=0.5\textwidth]{finndexRP3_files/figure-latex/assumptions-2.pdf} 
+    \end{frame}
+    \begin{frame}[fragile]{Model Validation}
+        \includegraphics[width=\textwidth]{finndexRP3_files/figure-latex/pricevsOtherStuff-1.pdf}
+    \end{frame}
+    \begin{frame}[fragile]{\textit{finndex} Comparison}
+        \begin{itemize}
+            \item Classic \textit{finndex} correlation with price: 0.516
+            \item Modified \textit{finndex} correlation with price: 0.935
+        \end{itemize}
+    \end{frame}
+    \section{Discussion \& Conclusions}
+    \begin{frame}[fragile]{Discussion \& Conclusions}
+        \begin{itemize}
+            \item Hypothesis that MLR can be applied to cryptocurrency predictions validated by MSE, graphical comparison, hypothesis testing
+            \item Model not date-centric: can be used to forecast wide array of future conditions 
+            \item Serving as leading indicator of price, MLR \textit{finndex} can be valuable tool for investors or currency traders
+            \item Numerical means of getting pulse on cryptocurrency sentiment can allow easy comparison of \textit{altcoins}: next step
+        \end{itemize}
+    \end{frame}
+    \end{document}
